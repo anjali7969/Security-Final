@@ -1,0 +1,15 @@
+{
+    "name": "GateWay Education",
+    "short_name": "GateWay",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "description": "GateWay Education - Your gateway to learning",
+    "icons": [
+        {
+            "src": "/src/assets/images/logo.png",
+            "sizes": "192x192",
+            "type": "images/png"
+        }
+    ]
+}
