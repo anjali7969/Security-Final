@@ -85,10 +85,16 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: "Please provide email and password" });
         }
 
-        const user = await User.findOne({ email }).select("+password");
+        const user = await User.findOne({ email }).select("+password +passwordLastChanged");
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        // ✅ Password expiry check
+        const ninetyDays = 90 * 24 * 60 * 60 * 1000; // 90 days in ms
+        if (Date.now() - new Date(user.passwordLastChanged).getTime() > ninetyDays) {
+            return res.status(403).json({ message: "Password expired. Please reset your password." });
         }
 
         const token = generateToken(user);
@@ -100,12 +106,12 @@ const loginUser = async (req, res) => {
             user: { _id: user._id, name: user.name, email: user.email, role: user.role }
         });
 
-
     } catch (error) {
         console.error("Login error:", error.message);
         res.status(500).json({ message: "Server error" });
     }
 };
+
 
 
 // ✅ Get Current Logged-in User
@@ -219,15 +225,15 @@ const resetPassword = async (req, res) => {
         // ✅ Ensure new password is provided
         const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
 
-if (!newPassword) {
-    return res.status(400).json({ message: "Password is required" });
-}
+        if (!newPassword) {
+            return res.status(400).json({ message: "Password is required" });
+        }
 
-if (!strongPasswordRegex.test(newPassword)) {
-    return res.status(400).json({
-        message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
-    });
-}
+        if (!strongPasswordRegex.test(newPassword)) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+        });
+    }
 
 
         // ✅ Set new password (Mongoose will trigger the pre("save") middleware)

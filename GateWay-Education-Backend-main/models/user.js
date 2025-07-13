@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// 🔹 Hash password before saving
+//  Hash password before saving
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
 
@@ -30,7 +30,7 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-// 🔹 Hash password before updating if modified
+//  Hash password before updating if modified
 userSchema.pre("findOneAndUpdate", async function (next) {
     if (!this._update.password) return next();
 
@@ -39,7 +39,7 @@ userSchema.pre("findOneAndUpdate", async function (next) {
     next();
 });
 
-// 🔹 Generate JWT Token for authentication
+//  Generate JWT Token for authentication
 userSchema.methods.getSignedJwtToken = function () {
     return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRE || "30d",
