@@ -85,17 +85,44 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: "Please provide email and password" });
         }
 
-        const user = await User.findOne({ email }).select("+password +passwordLastChanged");
+        const user = await User.findOne({ email }).select("+password +passwordLastChanged +failedLoginAttempts +lockUntil");
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        // ✅ Check if account is currently locked
+        if (user.lockUntil && user.lockUntil > Date.now()) {
+            const remaining = Math.ceil((user.lockUntil - Date.now()) / 60000); // in minutes
+            return res.status(403).json({ message: `Account locked. Try again in ${remaining} minute(s).` });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            // Increment failed attempts
+            user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+            if (user.failedLoginAttempts >= 3) {
+                user.lockUntil = new Date(Date.now() + 10 * 60 * 1000); // Lock for 10 minutes
+                await user.save();
+                return res.status(403).json({ message: "Account locked due to multiple failed attempts. Try again in 10 minutes." });
+            }
+
+            await user.save();
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
         // ✅ Password expiry check
-        const ninetyDays = 90 * 24 * 60 * 60 * 1000; // 90 days in ms
+        const ninetyDays = 90 * 24 * 60 * 60 * 1000;
         if (Date.now() - new Date(user.passwordLastChanged).getTime() > ninetyDays) {
             return res.status(403).json({ message: "Password expired. Please reset your password." });
         }
+
+        // ✅ Reset failed attempts on successful login
+        user.failedLoginAttempts = 0;
+        user.lockUntil = undefined;
+        await user.save();
 
         const token = generateToken(user);
 
@@ -111,6 +138,7 @@ const loginUser = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
 
 
 
