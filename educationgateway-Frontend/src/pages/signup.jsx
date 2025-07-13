@@ -106,17 +106,17 @@ const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
                         {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                     </button>
                     {/* ✅ Password strength message */}
-    {password && (
-        <p className={`text-xs px-1 mb-2 ${
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
-                ? 'text-green-600'
-                : 'text-red-600'
-        }`}>
-            {
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
-                    ? 'Strong password ✔️'
-                    : 'Must include uppercase, lowercase, number, special character (min 8 chars)'
-            }
+                     {password && (
+                        <p className={`text-xs px-1 mb-2 ${
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                }`}>
+                    {
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
+                            ? 'Strong password ✔️'
+                            : 'Must include uppercase, lowercase, number, special character (min 8 chars)'
+                }
         </p>
     )}
                 </div>
