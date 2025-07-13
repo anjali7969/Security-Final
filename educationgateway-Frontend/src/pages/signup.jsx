@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import zxcvbn from 'zxcvbn';
 import { registerUser } from "../api/api";
 
 const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
@@ -7,6 +8,8 @@ const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
+    const [strengthScore, setStrengthScore] = useState(0);
+    const [strengthLabel, setStrengthLabel] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -14,40 +17,35 @@ const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
     if (!isOpen) return null; // Prevent rendering when closed
 
     const handleSignup = async () => {
-    setLoading(true);
-    setError(""); // Reset previous errors
+        setLoading(true);
+        setError(""); // Reset previous errors
 
-    try {
-        // ✅ Client-side password strength check
-        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
-        if (!strongPasswordRegex.test(password)) {
-            setError("Password must include uppercase, lowercase, number, special character (min 8 chars)");
+        try {
+            // ✅ Client-side password strength check
+            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+            if (!strongPasswordRegex.test(password)) {
+                setError("Password must include uppercase, lowercase, number, special character (min 8 chars)");
+                setLoading(false);
+                return;
+            }
+
+            const userData = {
+                name,
+                email,
+                phone,
+                password,
+                role: "Student"
+            };
+
+            const response = await registerUser(userData);
+            alert("Registration Successful!");
+            onClose(); // Close modal after successful signup
+        } catch (error) {
+            setError(error.response?.data?.message || "Something went wrong. Try again.");
+        } finally {
             setLoading(false);
-            return;
         }
-
-        const userData = {
-            name,
-            email,
-            phone,
-            password,
-            role: "Student" // Explicitly set default role
-        };
-
-        console.log("Password being sent:", password); // ✅ Log password value
-
-        const response = await registerUser(userData);
-        console.log("✅ Signup Successful:", response);
-        alert("Registration Successful!");
-        onClose(); // Close modal after successful signup
-    } catch (error) {
-        console.error("❌ Signup Failed:", error.response?.data || error.message);
-        setError(error.response?.data?.message || "Something went wrong. Try again.");
-    } finally {
-        setLoading(false);
-    }
-};
-
+    };
 
     return (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-md z-50">
@@ -96,7 +94,14 @@ const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
                         className="w-full h-12 text-gray-900 placeholder-gray-400 text-sm rounded-full border border-gray-300 bg-white shadow-md focus:outline-none px-6 pr-14 mb-4"
                         placeholder="Enter your password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setPassword(value);
+                            const result = zxcvbn(value);
+                            setStrengthScore(result.score);
+                            const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+                            setStrengthLabel(labels[result.score]);
+                        }}
                     />
                     <button
                         type="button"
@@ -105,20 +110,46 @@ const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
                     >
                         {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                     </button>
-                    {/* ✅ Password strength message */}
-                     {password && (
-                        <p className={`text-xs px-1 mb-2 ${
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                }`}>
-                    {
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
-                            ? 'Strong password ✔️'
-                            : 'Must include uppercase, lowercase, number, special character (min 8 chars)'
-                }
-        </p>
-    )}
+
+                    {/* Strength Rules Message */}
+                    {password && (
+                        <p className={`text-xs px-1 mb-1 ${
+                            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
+                                ? 'text-green-600'
+                                : 'text-red-600'
+                        }`}>
+                            {
+                                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
+                                    ? 'Strong password ✔️'
+                                    : 'Must include uppercase, lowercase, number, special character (min 8 chars)'
+                            }
+                        </p>
+                    )}
+
+                    {/* Password Strength Indicator */}
+                    {password && (
+                        <>
+                            <p className={`text-xs px-1 font-semibold mb-1 ${
+                                strengthScore < 2 ? "text-red-500" :
+                                strengthScore === 2 ? "text-yellow-600" :
+                                "text-green-600"
+                            }`}>
+                                Strength: {strengthLabel}
+                            </p>
+                            <div className="w-full h-2 bg-gray-200 rounded-full mb-3">
+                                <div
+                                    className="h-full rounded-full transition-all duration-300"
+                                    style={{
+                                        width: `${(strengthScore + 1) * 20}%`,
+                                        backgroundColor:
+                                            strengthScore < 2 ? "#ef4444" :
+                                            strengthScore === 2 ? "#facc15" :
+                                            "#22c55e"
+                                    }}
+                                ></div>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Signup Button */}
