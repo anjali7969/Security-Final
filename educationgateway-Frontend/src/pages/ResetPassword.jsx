@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -85,6 +85,21 @@ const ResetPassword = () => {
                                     {showPassword ? "Hide" : "Show"}
                                 </button>
                             </div>
+
+                            {/* ✅ Password strength feedback */}
+                            {newPassword && (
+                                <p className={`mt-2 text-sm ${
+                                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(newPassword)
+                                        ? 'text-green-600'
+                                        : 'text-red-600'
+                                }`}>
+                                    {
+                                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(newPassword)
+                                            ? 'Strong password ✔️'
+                                            : 'Must include uppercase, lowercase, number, special character (min 8 chars)'
+                                    }
+                                </p>
+                            )}
                         </div>
 
                         <button

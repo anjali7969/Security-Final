@@ -7,10 +7,14 @@ const userSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true, select: false }, // Exclude password in queries
+        password: { type: String, required: true, select: false },
         phone: { type: String, required: true },
-        role: { type: String, enum: ["Admin", "Student"], default: "Student" }, // Role field
-        // profilePicture: { type: String, default: "" }, // Profile picture field
+        role: { type: String, enum: ["Admin", "Student"], default: "Student" },
+
+        // Security Additions
+        passwordHistory: { type: [String], default: [] },
+        passwordLastChanged: { type: Date, default: Date.now },
+
         resetPasswordToken: String,
         resetPasswordExpire: Date,
     },
@@ -38,7 +42,7 @@ userSchema.pre("findOneAndUpdate", async function (next) {
 // 🔹 Generate JWT Token for authentication
 userSchema.methods.getSignedJwtToken = function () {
     return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE || "30d", // Default to 30 days if not set
+        expiresIn: process.env.JWT_EXPIRE || "30d",
     });
 };
 
@@ -57,7 +61,7 @@ userSchema.methods.getResetPasswordToken = function () {
     const resetToken = crypto.randomBytes(20).toString("hex");
 
     this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Expires in 10 minutes
+    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
     return resetToken;
 };

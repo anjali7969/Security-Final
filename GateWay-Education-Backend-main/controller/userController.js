@@ -81,7 +81,6 @@ const updateByID = asyncHandler(async (req, res) => {
 //     }
 // });
 
-// ✅ Change user password (Current password required)
 const changeUserPassword = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
@@ -91,19 +90,39 @@ const changeUserPassword = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: "Password is required" });
         }
 
-        // ✅ Hash the new password before saving
+        // ✅ Enforce strong password
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        if (!strongPasswordRegex.test(password)) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+            });
+        }
+
+        const user = await User.findById(id).select("+password +passwordHistory");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // ✅ Check for password reuse
+        for (const oldHash of user.passwordHistory || []) {
+            const isSame = await bcrypt.compare(password, oldHash);
+            if (isSame) {
+                return res.status(400).json({ message: "You cannot reuse a recently used password." });
+            }
+        }
+
+        // ✅ Hash new password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const updatedUser = await User.findByIdAndUpdate(
-            id,
-            { password: hashedPassword }, // ✅ Store hashed password
-            { new: true }
-        );
+        // ✅ Update password, history, and last changed time
+        user.passwordHistory = [...(user.passwordHistory || [])].slice(-2); // keep last 2
+        user.passwordHistory.push(user.password); // store current one before changing
+        user.password = hashedPassword;
+        user.passwordLastChanged = Date.now();
 
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        await user.save();
 
         res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
@@ -111,6 +130,7 @@ const changeUserPassword = asyncHandler(async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 
 // Delete a user by ID (Admins can delete any user, Teachers and Students can delete only their own account)

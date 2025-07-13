@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { registerUser } from "../api/api";
 
@@ -14,29 +14,40 @@ const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
     if (!isOpen) return null; // Prevent rendering when closed
 
     const handleSignup = async () => {
-        setLoading(true);
-        setError(""); // Reset previous errors
+    setLoading(true);
+    setError(""); // Reset previous errors
 
-        try {
-            const userData = {
-                name,
-                email,
-                phone,
-                password,
-                role: "Student" // Explicitly set default role
-            };
-
-            const response = await registerUser(userData);
-            console.log("✅ Signup Successful:", response);
-            alert("Registration Successful!");
-            onClose(); // Close modal after successful signup
-        } catch (error) {
-            console.error("❌ Signup Failed:", error.response?.data || error.message);
-            setError(error.response?.data?.message || "Something went wrong. Try again.");
-        } finally {
+    try {
+        // ✅ Client-side password strength check
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        if (!strongPasswordRegex.test(password)) {
+            setError("Password must include uppercase, lowercase, number, special character (min 8 chars)");
             setLoading(false);
+            return;
         }
-    };
+
+        const userData = {
+            name,
+            email,
+            phone,
+            password,
+            role: "Student" // Explicitly set default role
+        };
+
+        console.log("Password being sent:", password); // ✅ Log password value
+
+        const response = await registerUser(userData);
+        console.log("✅ Signup Successful:", response);
+        alert("Registration Successful!");
+        onClose(); // Close modal after successful signup
+    } catch (error) {
+        console.error("❌ Signup Failed:", error.response?.data || error.message);
+        setError(error.response?.data?.message || "Something went wrong. Try again.");
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     return (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-md z-50">
@@ -94,6 +105,20 @@ const Signup = ({ isOpen, onClose, onSwitchToLogin }) => {
                     >
                         {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                     </button>
+                    {/* ✅ Password strength message */}
+    {password && (
+        <p className={`text-xs px-1 mb-2 ${
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
+                ? 'text-green-600'
+                : 'text-red-600'
+        }`}>
+            {
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)
+                    ? 'Strong password ✔️'
+                    : 'Must include uppercase, lowercase, number, special character (min 8 chars)'
+            }
+        </p>
+    )}
                 </div>
 
                 {/* Signup Button */}

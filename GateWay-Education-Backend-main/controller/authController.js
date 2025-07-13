@@ -29,6 +29,13 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        if (!strongPasswordRegex.test(password)) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+            });
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "Email already registered" });
@@ -210,9 +217,18 @@ const resetPassword = async (req, res) => {
         console.log("🔹 User Found:", user.email);
 
         // ✅ Ensure new password is provided
-        if (!newPassword || newPassword.length < 6) {
-            return res.status(400).json({ message: "Password must be at least 6 characters long" });
-        }
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+
+if (!newPassword) {
+    return res.status(400).json({ message: "Password is required" });
+}
+
+if (!strongPasswordRegex.test(newPassword)) {
+    return res.status(400).json({
+        message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+    });
+}
+
 
         // ✅ Set new password (Mongoose will trigger the pre("save") middleware)
         user.password = newPassword;
