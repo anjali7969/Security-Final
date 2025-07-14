@@ -129,7 +129,7 @@
 // export default Login;
 
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
@@ -148,23 +148,35 @@ const Login = ({ isOpen, onClose }) => {
     if (!isOpen) return null; // Prevent rendering when closed
 
     const handleLogin = async () => {
-        try {
-            const response = await loginUser({ email, password });
+    try {
+        const response = await loginUser({ email, password });
 
-            if (!response.success) {
-                setError(response.message || "Invalid login credentials.");
-                return;
-            }
-
-            localStorage.setItem("authToken", response.token);
-            localStorage.setItem("user", JSON.stringify(response.user));
-
-            navigate(response.user.role === "Admin" ? "/admin" : "/student");
-        } catch (error) {
-            console.error("❌ Login Failed:", error.response?.data || error.message);
-            setError(error.response?.data?.message || "Invalid email or password.");
+        if (!response.success) {
+            setError(response.message || "Invalid login credentials.");
+            return;
         }
-    };
+
+        // ✅ Store token and user info (with role) in localStorage
+        localStorage.setItem("authToken", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        JSON.parse(localStorage.getItem("user"))?.role
+
+
+        // ✅ Navigate based on Role (RBAC)
+        if (response.user.role === "Admin") {
+            navigate("/admin"); // Admin-specific dashboard
+        } else if (response.user.role === "Student") {
+            navigate("/student"); // Student-specific dashboard
+        } else {
+            navigate("/"); // fallback or unauthorized page
+        }
+
+    } catch (error) {
+        console.error("❌ Login Failed:", error.response?.data || error.message);
+        setError(error.response?.data?.message || "Invalid email or password.");
+    }
+};
+
 
 
 

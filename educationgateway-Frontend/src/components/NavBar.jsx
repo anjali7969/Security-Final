@@ -109,7 +109,7 @@
 // export default Navbar;
 
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
@@ -200,12 +200,13 @@ const Navbar = ({ onSignInClick, onSignUpClick, onLogout }) => {
                     ) : (
                         <>
                             {/* Sign In & Sign Up Buttons */}
-                            <button onClick={onSignInClick} className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-600 hover:text-white transition-all">
-                                Sign In
-                            </button>
-                            <button onClick={onSignUpClick} className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-all">
-                                Sign Up
-                            </button>
+                            <button onClick={() => navigate("/login")} className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-600 hover:text-white transition-all">
+    Sign In
+</button>
+<button onClick={() => navigate("/signup")} className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-all">
+    Sign Up
+</button>
+
                         </>
                     )}
                 </div>
