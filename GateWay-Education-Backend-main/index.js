@@ -12,7 +12,7 @@ const wishlistRouter = require("./router/wishlistRouter");
 const orderRouter = require("./router/orderRouter");
 const enrollmentRouter = require("./router/enrollmentRouter");
 const paymentRouter = require("./router/paymentRouter"); // ✅ Import Payments Router
-const captchaRouter = require("./router/CaptchaRouter"); // ✅ Import CAPTCHA Router
+const captchaRouter = require("./router/CaptchaRouter"); 
 
 const app = express();
 
