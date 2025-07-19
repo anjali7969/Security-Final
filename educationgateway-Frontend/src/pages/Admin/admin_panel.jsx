@@ -147,7 +147,6 @@
 
 // export default AdminPanel;
 
-import React from "react";
 import { Outlet } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import Sidebar from "../../components/Sidebar";

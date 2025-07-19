@@ -79,7 +79,7 @@
 
 
 import { useEffect, useState } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Navbar from "./components/NavBar";
 import AboutUs from "./pages/about_us";
 import AdminDashboard from "./pages/Admin/admin_dashboard";
@@ -91,14 +91,14 @@ import ShoppingCart from "./pages/cart";
 import Checkout from "./pages/checkout";
 import ContactUs from "./pages/contact_us";
 import Courses from "./pages/courses";
-import ForbiddenPage from "./pages/ForbiddenPage"; // ✅ Create this page
+import ForbiddenPage from "./pages/ForbiddenPage";
 import ForgotPasswordSimple from "./pages/ForgotPassword";
 import HomePage from "./pages/homepage";
 import LoginPage from "./pages/LoginPage";
 import ResetPassword from "./pages/ResetPassword";
 import SignupPage from "./pages/SignupPage";
 import StudentDashboard from "./pages/Student/student_dashboard";
-import RedirectIfAuthenticated from "./routes/RedirectIfAuthenticated"; // ✅ NEW
+import RedirectIfAuthenticated from "./routes/RedirectIfAuthenticated";
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -130,10 +130,10 @@ function App() {
 
     return (
         <Router>
-            {/* ✅ Hide navbar for admin users */}
-            {(!user || user.role !== "Admin") && (
+            {/* ✅ Hide Navbar when admin is logged in */}
+            {!user || user.role !== "Admin" ? (
                 <Navbar isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} />
-            )}
+            ) : null}
 
             <Routes>
                 {/* Public Routes */}
@@ -147,7 +147,7 @@ function App() {
                 <Route path="/cart" element={<ShoppingCart />} />
                 <Route path="/checkout/:orderId" element={<Checkout />} />
 
-                {/* ✅ Auth Redirects */}
+                {/* Auth Redirects */}
                 <Route
                     path="/login"
                     element={
@@ -165,23 +165,19 @@ function App() {
                     }
                 />
 
-                {/* ✅ Protected Admin Route with Role Check */}
-                <Route
-                    path="/admin/*"
-                    element={
-                        user?.role === "Admin" ? (
-                            <AdminPanel />
-                        ) : (
-                            <ForbiddenPage />
-                        )
-                    }
-                />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/courses" element={<ManageCourses />} />
-                <Route path="/admin/students" element={<ManageStudents />} />
-                <Route path="/admin/orders" element={<ManageOrders />} />
+                {/* Admin Routes (Only If Admin) */}
+                {user && user.role === "Admin" ? (
+                    <Route path="/admin" element={<AdminPanel />}>
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="courses" element={<ManageCourses />} />
+                        <Route path="students" element={<ManageStudents />} />
+                        <Route path="orders" element={<ManageOrders />} />
+                    </Route>
+                ) : (
+                    <Route path="/admin/*" element={<Navigate to="/403" replace />} />
+                )}
 
-                {/* ✅ Forbidden Access Page */}
+                {/* Forbidden Fallback */}
                 <Route path="/403" element={<ForbiddenPage />} />
             </Routes>
         </Router>

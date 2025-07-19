@@ -32,6 +32,7 @@ const { isAdmin } = require('../middlewares/roleMiddleware');
 const { protect } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadsMiddleware');
 const { uploadImage } = require('../controller/userController');
+const verifyCaptcha = require('../middlewares/VerifyCaptcha');
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ const router = express.Router();
 router.post('/register', registerUser);
 
 // Login user
-router.post('/login', loginUser);
+router.post('/login', verifyCaptcha, loginUser);
 
 // get current user 
 router.get("/getCurrentUser", protect, getCurrentUser);

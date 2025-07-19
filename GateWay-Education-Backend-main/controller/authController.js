@@ -5,6 +5,7 @@ const asyncHandler = require("express-async-handler");
 require('dotenv').config();
 const WelcomeEmail = require('../templets/WelcomeEmail');
 const ResetPasswordEmail = require('../templets/ResetPassword');
+const logger = require('../middlewares/logger');
 
 // Import mailer
 const transporter = require('../middlewares/mailConfig');
@@ -52,6 +53,9 @@ const registerUser = async (req, res) => {
         });
 
         const token = generateToken(user);
+
+        // After successful registration
+        logger.info(`REGISTER - ${user.email} registered with role ${user.role}`);
 
         // Send registration email
         const mailOptions = {
@@ -125,6 +129,9 @@ const loginUser = async (req, res) => {
         await user.save();
 
         const token = generateToken(user);
+
+        // After successful login
+        logger.info(`LOGIN - ${user.email} logged in`);
 
         res.status(200).json({
             success: true,
@@ -268,6 +275,9 @@ const resetPassword = async (req, res) => {
         user.password = newPassword;
         user.markModified("password");  // 🔥 Ensure Mongoose detects the change
         await user.save(); // ✅ Triggers pre("save") middleware automatically
+
+        // ✅ Add Audit Log
+        logger.info(`PASSWORD RESET - ${user.email} reset their password`);
 
         console.log("✅ Password Updated Successfully in Database!");
 

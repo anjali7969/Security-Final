@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const session = require("express-session"); // ✅ Added for CAPTCHA session
 const connectDB = require("./config/db");
 
 const userRouter = require("./router/userRouter");
@@ -11,10 +12,10 @@ const wishlistRouter = require("./router/wishlistRouter");
 const orderRouter = require("./router/orderRouter");
 const enrollmentRouter = require("./router/enrollmentRouter");
 const paymentRouter = require("./router/paymentRouter"); // ✅ Import Payments Router
-
+const captchaRouter = require("./router/CaptchaRouter"); // ✅ Import CAPTCHA Router
 
 const app = express();
-//this is the index.js
+
 // ✅ Connect Database
 connectDB();
 
@@ -23,6 +24,14 @@ app.use(cors({
     origin: "http://localhost:5173", // Allow frontend access
     methods: ["GET", "POST", "PUT", "DELETE", "UPDATE"],
     credentials: true, // Allow cookies if needed
+}));
+
+// ✅ Session Middleware (Required for CAPTCHA)
+app.use(session({
+    secret: "your-session-secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // true only if using HTTPS
 }));
 
 // ✅ Middleware
@@ -42,7 +51,7 @@ app.use("/wishlist", wishlistRouter);
 app.use("/order", orderRouter);
 app.use("/payment", paymentRouter);
 app.use("/enrollment", enrollmentRouter);
-
+app.use("/captcha", captchaRouter); // ✅ CAPTCHA Route
 
 // ✅ Error Handling Middleware (Catches Unhandled Errors)
 app.use((err, req, res, next) => {
