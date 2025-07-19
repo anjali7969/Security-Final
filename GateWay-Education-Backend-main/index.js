@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const session = require("express-session"); // ✅ Added for CAPTCHA session
+const session = require("express-session"); // ✅ Added for session
 const connectDB = require("./config/db");
 
 const userRouter = require("./router/userRouter");
@@ -12,7 +12,6 @@ const wishlistRouter = require("./router/wishlistRouter");
 const orderRouter = require("./router/orderRouter");
 const enrollmentRouter = require("./router/enrollmentRouter");
 const paymentRouter = require("./router/paymentRouter"); // ✅ Import Payments Router
-const captchaRouter = require("./router/CaptchaRouter"); // ✅ Import CAPTCHA Router
 
 const app = express();
 
@@ -26,13 +25,27 @@ app.use(cors({
     credentials: true, // Allow cookies if needed
 }));
 
-// ✅ Session Middleware (Required for CAPTCHA)
+// ✅ Session Middleware (Set expiry on inactivity)
 app.use(session({
-    secret: "your-session-secret",
+    secret: "your-session-secret", // Use env variable ideally
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // true only if using HTTPS
+    cookie: {
+        secure: false, // true if using HTTPS
+        httpOnly: true,
+        maxAge: 15 * 60 * 1000 // 💡 Session expires after 15 minutes of inactivity
+    }
 }));
+
+// ✅ Reset session expiry on activity
+app.use((req, res, next) => {
+    if (req.session) {
+        req.session._garbage = Date();
+        req.session.touch();
+    }
+    next();
+});
+
 
 // ✅ Middleware
 app.use(express.json()); // Parse JSON
@@ -51,7 +64,6 @@ app.use("/wishlist", wishlistRouter);
 app.use("/order", orderRouter);
 app.use("/payment", paymentRouter);
 app.use("/enrollment", enrollmentRouter);
-app.use("/captcha", captchaRouter); // ✅ CAPTCHA Route
 
 // ✅ Error Handling Middleware (Catches Unhandled Errors)
 app.use((err, req, res, next) => {
