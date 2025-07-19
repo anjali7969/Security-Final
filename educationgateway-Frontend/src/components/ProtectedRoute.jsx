@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
+// This component protects routes based on user roles
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
