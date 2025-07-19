@@ -57,7 +57,7 @@ const confirmOrder = asyncHandler(async (req, res) => {
         }
 
 
-
+        // ✅ Update User's Order History
         res.status(201).json({
             message: "Order confirmed successfully!",
             order: newOrder,
