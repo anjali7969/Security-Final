@@ -1,44 +1,62 @@
 const Order = require("../models/order");
 const User = require("../models/user");
 const asyncHandler = require("express-async-handler");
+const TransactionLog = require("../models/TransactionLog"); // 💡 Add this line
 
+
+// ✅ Confirm Order (Create a New Order)
 // ✅ Confirm Order (Create a New Order)
 const confirmOrder = asyncHandler(async (req, res) => {
     try {
-        const { cart, paymentMethod, phoneNumber } = req.body;  //city, address, remove the city and address
+        const { cart, paymentMethod, phoneNumber } = req.body;
 
         const userId = req.user.id;
 
-        // ✅ Validate Inputs
         if (!cart || cart.length === 0) {
             return res.status(400).json({ message: "Cart cannot be empty" });
         }
-        if (!paymentMethod || !phoneNumber) { // remove || !city || !address
+        if (!paymentMethod || !phoneNumber) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        // ✅ Check if User Exists
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // ✅ Calculate Total Amount from Cart Items
         let totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-        // ✅ Create Order
         const newOrder = new Order({
             user: userId,
             cart,
             totalAmount,
             paymentMethod,
-            // city,
-            // address,
             phoneNumber,
             status: "pending",
         });
 
         await newOrder.save();
+
+        // ✅ Log the Transaction
+        try {
+        await TransactionLog.create({
+            userId: userId,
+            activity: "Order Confirmation",
+            timestamp: new Date(),
+            ip: req.ip,
+            userAgent: req.headers['user-agent'],
+            status: "SUCCESS",
+            meta: {
+            totalAmount,
+            orderId: newOrder._id.toString(),
+            paymentMethod
+            }
+        });
+        } catch (logErr) {
+        console.error("❌ Failed to log transaction:", logErr);
+        }
+
+
 
         res.status(201).json({
             message: "Order confirmed successfully!",
@@ -50,6 +68,7 @@ const confirmOrder = asyncHandler(async (req, res) => {
         res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 });
+
 
 // ✅ Get Orders for a User // ✅ Populate Course Details
 const getUserOrders = asyncHandler(async (req, res) => {

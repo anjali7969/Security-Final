@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session"); // ✅ Added for session
+const helmet = require("helmet"); // ✅ Import helmet
 const connectDB = require("./config/db");
 
 const userRouter = require("./router/userRouter");
@@ -18,6 +19,9 @@ const app = express();
 // ✅ Connect Database
 connectDB();
 
+// ✅ Helmet for secure HTTP headers
+app.use(helmet()); // ✅ Add this early to apply security headers
+
 // ✅ Enable CORS (Frontend Connection)
 app.use(cors({
     origin: "http://localhost:5173", // Allow frontend access
@@ -25,7 +29,7 @@ app.use(cors({
     credentials: true, // Allow cookies if needed
 }));
 
-// ✅ Session Middleware (Set expiry on inactivity)
+// ✅ Session Middleware
 app.use(session({
     secret: "your-session-secret", // Use env variable ideally
     resave: false,
@@ -33,26 +37,37 @@ app.use(session({
     cookie: {
         secure: false, // true if using HTTPS
         httpOnly: true,
-        maxAge: 15 * 60 * 1000 // 💡 Session expires after 15 minutes of inactivity
+        maxAge: 15 * 60 * 1000 // Cookie max age (15 mins)
     }
 }));
 
-// ✅ Reset session expiry on activity
+// ✅ Middleware to expire session on inactivity
 app.use((req, res, next) => {
-    if (req.session) {
-        req.session._garbage = Date();
-        req.session.touch();
+    const now = Date.now();
+
+    if (req.session.lastActivity && now - req.session.lastActivity > 15 * 60 * 1000) {
+        req.session.destroy(err => {
+            if (err) console.error("Session destroy error:", err);
+        });
+        return res.status(440).json({ message: "Session expired due to inactivity" });
     }
+
+    // Update last activity time
+    req.session.lastActivity = now;
     next();
 });
-
 
 // ✅ Middleware
 app.use(express.json()); // Parse JSON
 app.use(express.urlencoded({ extended: true })); // Parse form data
 
 // ✅ Serve Static Files (Fix Image Display Issue)
-app.use("/uploads", express.static("public/uploads"));
+app.use("/uploads", express.static("public/uploads", {
+  setHeaders: (res, path, stat) => {
+    res.set("Cross-Origin-Resource-Policy", "cross-origin");
+  }
+}));
+
 
 // ✅ Define Routes
 app.use("/user", userRouter);
