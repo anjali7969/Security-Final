@@ -40,7 +40,7 @@ const router = express.Router();
 router.post('/register', registerUser);
 
 // Login user
-router.post('/login', verifyCaptcha, loginUser);
+router.post('/login', loginUser);
 
 // get current user 
 router.get("/getCurrentUser", protect, getCurrentUser);

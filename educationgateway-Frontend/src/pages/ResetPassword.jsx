@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,23 +11,37 @@ const ResetPassword = () => {
     const [newPassword, setNewPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [csrfToken, setCsrfToken] = useState("");
     const navigate = useNavigate();
 
-    // Toggle Password Visibility
+    // ✅ Fetch CSRF Token on Mount
+    useEffect(() => {
+        axios.get("http://localhost:5003/get-csrf-token", { withCredentials: true })
+            .then(res => setCsrfToken(res.data.csrfToken))
+            .catch(err => console.error("Failed to fetch CSRF token:", err));
+    }, []);
+
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
-    // Handle Reset Password Submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await axios.post("http://localhost:5003/auth/reset-password", {
-                token,
-                newPassword,
-            });
+            await axios.post("http://localhost:5003/auth/reset-password",
+                {
+                    token,
+                    newPassword,
+                },
+                {
+                    headers: {
+                        "csrf-token": csrfToken
+                    },
+                    withCredentials: true
+                }
+            );
 
             toast.success("Password reset successfully! Please log in.", {
                 position: "top-right",
@@ -51,10 +65,8 @@ const ResetPassword = () => {
 
     return (
         <div className="bg-white min-h-screen">
-            {/* Navbar */}
             <Navbar />
 
-            {/* Page Content */}
             <div className="flex items-center justify-center min-h-[80vh] px-4">
                 <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full border border-gray-200">
                     <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">Reset Password</h2>
@@ -86,7 +98,6 @@ const ResetPassword = () => {
                                 </button>
                             </div>
 
-                            {/* ✅ Password strength feedback */}
                             {newPassword && (
                                 <p className={`mt-2 text-sm ${
                                     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(newPassword)

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/NavBar";
@@ -7,13 +7,29 @@ import Navbar from "../components/NavBar";
 const ForgotPasswordSimple = () => {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
+    const [csrfToken, setCsrfToken] = useState("");
+
+    // ✅ Fetch CSRF Token on Mount
+    useEffect(() => {
+        axios.get("http://localhost:5003/get-csrf-token", { withCredentials: true })
+            .then(res => setCsrfToken(res.data.csrfToken))
+            .catch(err => console.error("Failed to fetch CSRF token:", err));
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await axios.post("http://localhost:5003/auth/reset-password-request", { email });
+            await axios.post("http://localhost:5003/auth/reset-password-request",
+                { email },
+                {
+                    headers: {
+                        "csrf-token": csrfToken
+                    },
+                    withCredentials: true
+                }
+            );
             toast.success("Reset link sent! Check your email.");
         } catch (err) {
             toast.error(err.response?.data?.message || "Something went wrong. Try again.");

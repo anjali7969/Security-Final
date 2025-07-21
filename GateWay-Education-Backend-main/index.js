@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session"); // ✅ Added for session
 const helmet = require("helmet"); // ✅ Import helmet
+const csrf = require("csurf"); // ✅ CSRF middleware
+const cookieParser = require("cookie-parser"); // ✅ Needed for CSRF with cookies
 const connectDB = require("./config/db");
 
 const userRouter = require("./router/userRouter");
@@ -20,26 +22,33 @@ const app = express();
 connectDB();
 
 // ✅ Helmet for secure HTTP headers
-app.use(helmet()); // ✅ Add this early to apply security headers
+app.use(helmet());
 
-// ✅ Enable CORS (Frontend Connection)
+// ✅ Cookie Parser (required for CSRF)
+app.use(cookieParser());
+
+// ✅ Enable CORS
 app.use(cors({
-    origin: "http://localhost:5173", // Allow frontend access
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE", "UPDATE"],
-    credentials: true, // Allow cookies if needed
+    credentials: true,
 }));
 
 // ✅ Session Middleware
 app.use(session({
-    secret: "your-session-secret", // Use env variable ideally
+    secret: "your-session-secret",
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: false, // true if using HTTPS
+        secure: false,
         httpOnly: true,
-        maxAge: 15 * 60 * 1000 // Cookie max age (15 mins)
+        maxAge: 15 * 60 * 1000 // 15 minutes
     }
 }));
+
+// ✅ CSRF Protection (after session)
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
 
 // ✅ Middleware to expire session on inactivity
 app.use((req, res, next) => {
@@ -52,24 +61,27 @@ app.use((req, res, next) => {
         return res.status(440).json({ message: "Session expired due to inactivity" });
     }
 
-    // Update last activity time
     req.session.lastActivity = now;
     next();
 });
 
 // ✅ Middleware
-app.use(express.json()); // Parse JSON
-app.use(express.urlencoded({ extended: true })); // Parse form data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve Static Files (Fix Image Display Issue)
+// ✅ Static files
 app.use("/uploads", express.static("public/uploads", {
-  setHeaders: (res, path, stat) => {
-    res.set("Cross-Origin-Resource-Policy", "cross-origin");
-  }
+    setHeaders: (res, path, stat) => {
+        res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    }
 }));
 
+// ✅ Provide CSRF token to frontend
+app.get("/get-csrf-token", (req, res) => {
+    res.status(200).json({ csrfToken: req.csrfToken() });
+});
 
-// ✅ Define Routes
+// ✅ Routes
 app.use("/user", userRouter);
 app.use("/auth", authRouter);
 app.use("/courses", courseRouter);
@@ -80,22 +92,22 @@ app.use("/order", orderRouter);
 app.use("/payment", paymentRouter);
 app.use("/enrollment", enrollmentRouter);
 
-// ✅ Error Handling Middleware (Catches Unhandled Errors)
+// ✅ Error handling
 app.use((err, req, res, next) => {
     console.error(`[${new Date().toISOString()}] ❌ Error:`, err.message);
     res.status(500).json({ message: "Internal Server Error", error: err.message });
 });
 
-// ✅ Start the Server and Export the Server Instance
+// ✅ Start server
 const PORT = 5003;
 const server = app.listen(PORT, () => {
     console.log(`🚀 Server started at port ${PORT}`);
 });
 
-// ✅ Handle Unhandled Promise Rejections
+// ✅ Handle promise rejections
 process.on("unhandledRejection", (err, promise) => {
     console.error(`[${new Date().toISOString()}] ❌ Unhandled Promise Rejection: ${err.message}`);
-    process.exit(1); // Exit with failure
+    process.exit(1);
 });
 
 module.exports = server;

@@ -4,13 +4,34 @@ import { useParams } from "react-router-dom";
 const Checkout = () => {
     const { orderId } = useParams(); // Get orderId from the URL
     const [orderDetails, setOrderDetails] = useState(null);
+    const [csrfToken, setCsrfToken] = useState(""); // ✅ CSRF Token
+
+    // ✅ Fetch CSRF token on mount
+    useEffect(() => {
+        const fetchCsrf = async () => {
+            try {
+                const res = await fetch("http://localhost:5003/get-csrf-token", {
+                    credentials: "include"
+                });
+                const data = await res.json();
+                setCsrfToken(data.csrfToken);
+            } catch (error) {
+                console.error("❌ CSRF fetch failed:", error.message);
+            }
+        };
+
+        fetchCsrf();
+    }, []);
 
     useEffect(() => {
         const fetchOrderDetails = async () => {
             try {
                 const response = await fetch(`http://localhost:5003/checkout/user-orders/${orderId}`, {
+                    method: "GET",
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                        "csrf-token": csrfToken // ✅ Include CSRF token
                     }
                 });
 
@@ -27,8 +48,8 @@ const Checkout = () => {
             }
         };
 
-        if (orderId) fetchOrderDetails();
-    }, [orderId]);
+        if (orderId && csrfToken) fetchOrderDetails();
+    }, [orderId, csrfToken]);
 
     if (!orderDetails) return <p>Loading...</p>;
 

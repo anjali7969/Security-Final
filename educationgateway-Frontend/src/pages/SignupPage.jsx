@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import zxcvbn from "zxcvbn";
 import { registerUser } from "../api/api";
+import axios from "../api/axiosInstance"; // ✅ CSRF-protected Axios
 import Navbar from "../components/NavBar"; // ✅ Import Navbar
 
 const SignupPage = () => {
@@ -17,6 +18,11 @@ const SignupPage = () => {
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
+
+    // ✅ Fetch CSRF token on mount
+    useEffect(() => {
+        axios.get("/get-csrf-token");
+    }, []);
 
     const handleSignup = async () => {
         setLoading(true);
