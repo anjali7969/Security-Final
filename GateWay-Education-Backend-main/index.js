@@ -1,11 +1,16 @@
 const express = require("express");
 const cors = require("cors");
-const session = require("express-session"); // ✅ Added for session
-const helmet = require("helmet"); // ✅ Import helmet
-const csrf = require("csurf"); // ✅ CSRF middleware
-const cookieParser = require("cookie-parser"); // ✅ Needed for CSRF with cookies
+const session = require("express-session");
+const helmet = require("helmet");
+const csrf = require("csurf");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 
+// ✅ Input Sanitization
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+
+// ✅ Routers
 const userRouter = require("./router/userRouter");
 const courseRouter = require("./router/courseRouter");
 const assignmentRouter = require('./router/assignmentRouter');
@@ -14,7 +19,7 @@ const cartRouter = require("./router/cartRouter");
 const wishlistRouter = require("./router/wishlistRouter");
 const orderRouter = require("./router/orderRouter");
 const enrollmentRouter = require("./router/enrollmentRouter");
-const paymentRouter = require("./router/paymentRouter"); // ✅ Import Payments Router
+const paymentRouter = require("./router/paymentRouter");
 
 const app = express();
 
@@ -24,15 +29,17 @@ connectDB();
 // ✅ Helmet for secure HTTP headers
 app.use(helmet());
 
-// ✅ Cookie Parser (required for CSRF)
+// ✅ Cookie Parser
 app.use(cookieParser());
 
 // ✅ Enable CORS
-app.use(cors({
-    origin: "http://localhost:5173",
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:4173"], // ✅ allow both dev and preview ports
     methods: ["GET", "POST", "PUT", "DELETE", "UPDATE"],
     credentials: true,
-}));
+  })
+);
 
 // ✅ Session Middleware
 app.use(session({
@@ -46,28 +53,35 @@ app.use(session({
     }
 }));
 
-// ✅ CSRF Protection (after session)
+// ✅ Body Parsers — must come before CSRF middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ CSRF Protection (after cookieParser + session + body parser)
 const csrfProtection = csrf({ cookie: true });
 app.use(csrfProtection);
+
+// ✅ Provide CSRF token to frontend
+app.get("/get-csrf-token", (req, res) => {
+    res.status(200).json({ csrfToken: req.csrfToken() });
+});
 
 // ✅ Middleware to expire session on inactivity
 app.use((req, res, next) => {
     const now = Date.now();
-
     if (req.session.lastActivity && now - req.session.lastActivity > 15 * 60 * 1000) {
         req.session.destroy(err => {
             if (err) console.error("Session destroy error:", err);
         });
         return res.status(440).json({ message: "Session expired due to inactivity" });
     }
-
     req.session.lastActivity = now;
     next();
 });
 
-// ✅ Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ✅ Input Sanitization Middleware
+app.use(mongoSanitize());
+app.use(xss());
 
 // ✅ Static files
 app.use("/uploads", express.static("public/uploads", {
@@ -75,11 +89,6 @@ app.use("/uploads", express.static("public/uploads", {
         res.set("Cross-Origin-Resource-Policy", "cross-origin");
     }
 }));
-
-// ✅ Provide CSRF token to frontend
-app.get("/get-csrf-token", (req, res) => {
-    res.status(200).json({ csrfToken: req.csrfToken() });
-});
 
 // ✅ Routes
 app.use("/user", userRouter);

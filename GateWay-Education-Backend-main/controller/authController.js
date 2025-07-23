@@ -6,9 +6,16 @@ require('dotenv').config();
 const WelcomeEmail = require('../templets/WelcomeEmail');
 const ResetPasswordEmail = require('../templets/ResetPassword');
 const logger = require('../middlewares/logger');
-
+const validator = require("validator"); // ✅ Import validator at top
+const CryptoJS = require("crypto-js");
 // Import mailer
 const transporter = require('../middlewares/mailConfig');
+
+const encryptEmailDeterministic  = (email) => {
+    return CryptoJS.HmacSHA256(email, process.env.EMAIL_SECRET).toString();
+};
+
+
 
 // Generate JWT Token
 const generateToken = (user) => {
@@ -19,15 +26,28 @@ const generateToken = (user) => {
     );
 };
 
-// Register a new user (Student, Admin)
+// ✅ Register a new user (Student, Admin)
 const registerUser = async (req, res) => {
     try {
         console.log("Received signup request:", req.body);
 
-        const { name, email, password, phone, role } = req.body;
+        let { name, email, password, phone, role } = req.body;
+
+        // ✅ Debug role being received from frontend
+        console.log("📨 Requested role:", role);
+
+        // ✅ Sanitize input
+        name = validator.escape(name.trim());
+        email = validator.normalizeEmail(email.trim());
+        phone = validator.escape(phone.trim());
+        role = (role || "Student").trim(); // ✅ Clean up role
 
         if (!name || !email || !password || !phone) {
             return res.status(400).json({ message: "All fields are required" });
+        }
+
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ message: "Invalid email format" });
         }
 
         const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
@@ -37,30 +57,32 @@ const registerUser = async (req, res) => {
             });
         }
 
-        const existingUser = await User.findOne({ email });
+        // ✅ Encrypt email deterministically
+        const encryptedEmail = encryptEmailDeterministic(email);
+
+        // ✅ Check if encrypted email already exists
+        const existingUser = await User.findOne({ email: encryptedEmail });
         if (existingUser) {
             return res.status(400).json({ message: "Email already registered" });
         }
 
-        // const hashedPassword = await bcrypt.hash(password, 10);
+        // ✅ Create new user with encrypted email
         const user = await User.create({
             name,
-            email,
+            email: encryptedEmail,
             password,
             phone,
+            role,
 
-            role: role || "Student",
         });
 
         const token = generateToken(user);
 
-        // After successful registration
-        logger.info(`REGISTER - ${user.email} registered with role ${user.role}`);
+        logger.info(`REGISTER - ${email} registered with role ${user.role}`);
 
-        // Send registration email
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: user.email,
+            to: email,
             subject: "Registration Successful. Welcome!",
             html: WelcomeEmail({ name: user.name }),
         };
@@ -70,7 +92,7 @@ const registerUser = async (req, res) => {
             success: true,
             message: "User registered successfully",
             token,
-            user: { name: user.name, email: user.email, role: user.role }
+            user: { name: user.name, email, role: user.role } // send plain email for frontend
         });
 
     } catch (error) {
@@ -80,35 +102,48 @@ const registerUser = async (req, res) => {
 };
 
 
-// Login user (Student, Admin) 
+
+
+// ✅ Login user (Student, Admin)
 const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        let { email, password } = req.body;
+
+        // ✅ 1. Sanitize input
+        email = validator.normalizeEmail(email.trim());
 
         if (!email || !password) {
             return res.status(400).json({ message: "Please provide email and password" });
         }
 
-        const user = await User.findOne({ email }).select("+password +passwordLastChanged +failedLoginAttempts +lockUntil");
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ message: "Invalid email format" });
+        }
+
+        // ✅ 2. Encrypt email to match encrypted DB value
+        const encryptedEmail = encryptEmailDeterministic(email);
+
+        // ✅ 3. Find user using encrypted email (FIXED)
+        const user = await User.findOne({ email: encryptedEmail })
+            .select("+password +passwordLastChanged +failedLoginAttempts +lockUntil");
 
         if (!user) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
-        // ✅ Check if account is currently locked
+        // ✅ 4. Check if account is locked
         if (user.lockUntil && user.lockUntil > Date.now()) {
-            const remaining = Math.ceil((user.lockUntil - Date.now()) / 60000); // in minutes
+            const remaining = Math.ceil((user.lockUntil - Date.now()) / 60000);
             return res.status(403).json({ message: `Account locked. Try again in ${remaining} minute(s).` });
         }
 
+        // ✅ 5. Compare password
         const isMatch = await bcrypt.compare(password, user.password);
-
         if (!isMatch) {
-            // Increment failed attempts
             user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
 
             if (user.failedLoginAttempts >= 3) {
-                user.lockUntil = new Date(Date.now() + 10 * 60 * 1000); // Lock for 10 minutes
+                user.lockUntil = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
                 await user.save();
                 return res.status(403).json({ message: "Account locked due to multiple failed attempts. Try again in 10 minutes." });
             }
@@ -117,27 +152,34 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
-        // ✅ Password expiry check
+        // ✅ 6. Check password age (90-day expiry)
         const ninetyDays = 90 * 24 * 60 * 60 * 1000;
         if (Date.now() - new Date(user.passwordLastChanged).getTime() > ninetyDays) {
             return res.status(403).json({ message: "Password expired. Please reset your password." });
         }
 
-        // ✅ Reset failed attempts on successful login
+        // ✅ 7. Clear failed attempts
         user.failedLoginAttempts = 0;
         user.lockUntil = undefined;
         await user.save();
 
+        // ✅ 8. Generate JWT
         const token = generateToken(user);
 
-        // After successful login
-        logger.info(`LOGIN - ${user.email} logged in`);
+        // ✅ 9. Logging
+        logger.info(`LOGIN - ${email} logged in`);
 
+        // ✅ 10. Send response
         res.status(200).json({
             success: true,
             message: "Login successful",
             token,
-            user: { _id: user._id, name: user.name, email: user.email, role: user.role }
+            user: {
+                _id: user._id,
+                name: user.name,
+                email, // return original plain email
+                role: user.role
+            }
         });
 
     } catch (error) {
@@ -145,6 +187,12 @@ const loginUser = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+
+
+
+
+
 
 
 

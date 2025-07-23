@@ -13,3 +13,67 @@
 2025-07-21 22:26:36 [INFO]: LOGIN - he@gmail.com logged in
 2025-07-21 22:27:20 [INFO]: LOGIN - he@gmail.com logged in
 2025-07-22 00:40:09 [INFO]: LOGIN - he@gmail.com logged in
+2025-07-22 22:29:30 [INFO]: LOGIN - he@gmail.com logged in
+2025-07-22 22:30:31 [INFO]: LOGIN - admin7@gmail.com logged in
+2025-07-22 22:31:31 [INFO]: LOGIN - admin7@gmail.com logged in
+2025-07-22 22:32:58 [INFO]: LOGIN - admin7@gmail.com logged in
+2025-07-22 23:09:53 [INFO]: REGISTER - admin77@gmail.com registered with role Admin
+2025-07-22 23:10:14 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-22 23:17:51 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-22 23:26:04 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-22 23:27:45 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-22 23:31:50 [INFO]: LOGIN - admin7@gmail.com logged in
+2025-07-22 23:32:51 [INFO]: LOGIN - he@gmail.com logged in
+2025-07-22 23:33:56 [INFO]: LOGIN - admin7@gmail.com logged in
+2025-07-22 23:34:31 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 00:16:48 [INFO]: REGISTER - cleanuser1@gmail.com registered with role Student
+2025-07-23 00:17:26 [INFO]: REGISTER - cleanuser2@gmail.com registered with role Student
+2025-07-23 00:18:32 [INFO]: REGISTER - alice123@gmail.com registered with role Student
+2025-07-23 00:20:01 [INFO]: REGISTER - alice1234@gmail.com registered with role Student
+2025-07-23 00:26:28 [INFO]: REGISTER - cleanuser12@gmail.com registered with role Student
+2025-07-23 00:28:28 [INFO]: REGISTER - safe1@example.com registered with role Student
+2025-07-23 00:32:37 [INFO]: REGISTER - safe2@example.com registered with role Student
+2025-07-23 01:17:26 [INFO]: REGISTER - rohan@gmail.com registered with role Student
+2025-07-23 02:00:25 [INFO]: REGISTER - rohan1@gmail.com registered with role Student
+2025-07-23 02:05:32 [INFO]: REGISTER - rohan12@gmail.com registered with role Student
+2025-07-23 02:16:03 [INFO]: REGISTER - anjali0@gmail.com registered with role Student
+2025-07-23 02:16:33 [INFO]: LOGIN - anjali0@gmail.com logged in
+2025-07-23 02:21:56 [INFO]: REGISTER - admin77@gmail.com registered with role Student
+2025-07-23 02:22:24 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 02:24:15 [INFO]: REGISTER - admin77@gmail.com registered with role Admin
+2025-07-23 02:24:44 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 02:27:52 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 02:47:02 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:01:16 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:20:22 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:22:46 [INFO]: REGISTER - anjali6@gmail.com registered with role Student
+2025-07-23 03:23:10 [INFO]: LOGIN - anjali6@gmail.com logged in
+2025-07-23 03:24:53 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:25:37 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:29:08 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:29:34 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:32:33 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:34:17 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:34:39 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:35:30 [INFO]: LOGIN - anjali0@gmail.com logged in
+2025-07-23 03:36:06 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 03:39:28 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 15:29:13 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 15:30:38 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 15:50:21 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 15:50:54 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 15:51:32 [INFO]: LOGIN - anjali0@gmail.com logged in
+2025-07-23 15:51:53 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 15:55:51 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 15:57:23 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 16:01:35 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 18:27:15 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 18:27:53 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 19:58:59 [INFO]: LOGIN - anjali6@gmail.com logged in
+2025-07-23 20:12:33 [INFO]: LOGIN - anjali6@gmail.com logged in
+2025-07-23 20:19:03 [INFO]: LOGIN - anjali6@gmail.com logged in
+2025-07-23 20:29:02 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 20:29:32 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 20:30:55 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 20:31:24 [INFO]: LOGIN - admin77@gmail.com logged in
+2025-07-23 20:33:41 [INFO]: LOGIN - anjali0@gmail.com logged in
