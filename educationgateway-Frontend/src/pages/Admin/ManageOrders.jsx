@@ -124,28 +124,45 @@
 import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { deleteOrder, getAllOrders, updateOrderStatus } from "../../api/api"; // ✅ Correct import
+import { getAllOrders } from "../../api/api";
+import axios from "../../api/axiosInstance"; // ✅ Import axios instance for CSRF
 
 const ManageOrders = () => {
     const [orders, setOrders] = useState([]);
+    const [csrfToken, setCsrfToken] = useState(""); // ✅ CSRF token state
 
     useEffect(() => {
-        const fetchOrders = async () => {
+        const fetchData = async () => {
             try {
-                const data = await getAllOrders();
-                console.log("Fetched Orders:", data); // ✅ Debugging
-                setOrders(data || []);
+                const [ordersRes, csrfRes] = await Promise.all([
+                    getAllOrders(),
+                    axios.get("/get-csrf-token", { withCredentials: true }),
+                ]);
+                setOrders(ordersRes || []);
+                setCsrfToken(csrfRes.data.csrfToken);
             } catch (error) {
-                console.error("Error fetching orders:", error);
-                setOrders([]); // Prevent errors by setting an empty array
+                console.error("Error fetching data or CSRF:", error);
+                setOrders([]);
             }
         };
-        fetchOrders();
+
+        fetchData();
     }, []);
 
     const handleUpdateStatus = async (orderId, newStatus) => {
         try {
-            await updateOrderStatus(orderId, newStatus); // ✅ Fixed function call
+            await axios.put(
+                `/order/status/${orderId}`,
+                { status: newStatus },
+                {
+                    headers: {
+                        "csrf-token": csrfToken,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                }
+            );
+
             setOrders((prevOrders) =>
                 prevOrders.map((order) =>
                     order._id === orderId ? { ...order, status: newStatus } : order
@@ -161,22 +178,25 @@ const ManageOrders = () => {
 
         if (confirmDelete) {
             try {
-                await deleteOrder(orderId);
+                await axios.delete(`/order/${orderId}`, {
+                    headers: { "csrf-token": csrfToken },
+                    withCredentials: true,
+                });
+
                 setOrders((prevOrders) => prevOrders.filter((order) => order._id !== orderId));
-                alert("Order deleted successfully!"); // ✅ Alert after successful deletion
+                alert("Order deleted successfully!");
             } catch (error) {
                 console.error("Error deleting order:", error);
-                alert("Failed to delete the order. Please try again."); // ✅ Error alert
+                alert("Failed to delete the order. Please try again.");
             }
         }
     };
-
 
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
 
-            <h2 className="text-2xl font-semibold  text-black mb-4">Manage Orders</h2>
+            <h2 className="text-2xl font-semibold text-black mb-4">Manage Orders</h2>
             <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse border border-gray-300 rounded-lg shadow-md">
                     <thead>
@@ -195,8 +215,8 @@ const ManageOrders = () => {
                                 <tr key={order._id} className="border-collapse border text-gray-800">
                                     <td className="py-3 px-6">{order._id}</td>
                                     <td className="py-3 px-6">{order.user?.name || "Unknown"}</td>
-                                    <td className="py-3 px-6">${order.totalAmount}</td> {/* ✅ Fixed totalAmount */}
-                                    <td className="py-3 px-6">{order.address}</td> {/* ✅ Fixed address field */}
+                                    <td className="py-3 px-6">${order.totalAmount}</td>
+                                    <td className="py-3 px-6">{order.address}</td>
                                     <td className="py-3 px-6">
                                         <select
                                             className="border bg-gray-200 rounded px-2 py-1"
@@ -233,6 +253,7 @@ const ManageOrders = () => {
 };
 
 export default ManageOrders;
+
 
 
 

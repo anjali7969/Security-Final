@@ -171,53 +171,66 @@ const LoginPage = () => {
     fetchToken();
   }, []);
 
-  const handleLogin = async () => {
-    setError("");
+  // ✅ Your full code stays intact, below is the only change inside handleLogin()
 
-    if (!validateCaptcha(captchaInput)) {
-      setError("❌ Invalid CAPTCHA. Please try again.");
+const handleLogin = async () => {
+  setError("");
+
+  if (!validateCaptcha(captchaInput)) {
+    setError("❌ Invalid CAPTCHA. Please try again.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+
+    const response = await axios.post(
+      "/auth/login",
+      { email, password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "csrf-token": csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
+
+    const res = response.data;
+
+    if (!res.success) {
+      setError(res.message || "Invalid login credentials.");
       return;
     }
 
-    try {
-      setLoading(true);
+    console.log("🧾 Logged in user:", res.user);
 
-      const response = await axios.post(
-        "/auth/login",
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "csrf-token": csrfToken,
-          },
-          withCredentials: true,
-        }
-      );
+    localStorage.setItem("user", JSON.stringify(res.user));
+    localStorage.setItem("authToken", res.token);
 
-      const res = response.data;
-
-      if (!res.success) {
-        setError(res.message || "Invalid login credentials.");
-        return;
-      }
-
-      localStorage.setItem("authToken", res.token);
-      localStorage.setItem("user", JSON.stringify(res.user));
-
-      if (res.user.role === "Admin") {
+    // ✅ New: Delay + verify user again from localStorage before redirect
+    setTimeout(() => {
+      const freshUser = JSON.parse(localStorage.getItem("user"));
+      if (freshUser?.role === "Admin") {
         navigate("/admin");
-      } else if (res.user.role === "Student") {
+      } else if (freshUser?.role === "Student") {
         navigate("/student");
       } else {
         navigate("/");
       }
-    } catch (error) {
-      console.error("❌ Login Failed:", error.response?.data || error.message);
-      setError(error.response?.data?.message || "Login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, 200); // Give storage time to commit
+
+  } catch (error) {
+    console.error("❌ Login Failed:", error.response?.data || error.message);
+    setError(error.response?.data?.message || "Login failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-start justify-center bg-gray-100 px-4 pt-32">

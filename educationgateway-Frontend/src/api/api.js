@@ -23,19 +23,29 @@ api.interceptors.request.use((config) => {
 
 //  Register User Function
 export const registerUser = async (userData) => {
-    try {
-        console.log("📤 Sending request to:", `${API_BASE_URL}/auth/register`);
-        console.log("📝 Data being sent:", userData);
+  try {
+    console.log("📤 Sending request to:", `${API_BASE_URL}/auth/register`);
+    console.log("📝 Data being sent:", userData);
 
-        const response = await api.post("/auth/register", userData);
+    // ✅ Fetch CSRF token before sending protected request
+    const csrfRes = await api.get("/get-csrf-token");
+    const csrfToken = csrfRes.data.csrfToken;
 
-        console.log("✅ Response received:", response.data);
-        return response.data;
-    } catch (error) {
-        console.error("❌ Registration Error:", error.response?.data || error.message);
-        throw error;
-    }
+    // ✅ Include CSRF token in headers
+    const response = await api.post("/auth/register", userData, {
+      headers: {
+        "CSRF-Token": csrfToken,
+      }
+    });
+
+    console.log("✅ Response received:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Registration Error:", error.response?.data || error.message);
+    throw error;
+  }
 };
+
 
 // ✅ Login User Function
 export const loginUser = async (userData) => {

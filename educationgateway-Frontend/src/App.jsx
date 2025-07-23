@@ -78,6 +78,14 @@
 
 
 
+// ✅ Disable console logs based on environment variable
+if (import.meta.env.VITE_DISABLE_LOGS === "true") {
+  console.log = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+  console.debug = () => {};
+}
+
 import { useEffect, useState } from "react";
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Navbar from "./components/NavBar";
@@ -101,87 +109,95 @@ import StudentDashboard from "./pages/Student/student_dashboard";
 import RedirectIfAuthenticated from "./routes/RedirectIfAuthenticated";
 
 function App() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [user, setUser] = useState(null);
+  console.log("Testing..."); // ✅ Add this to verify if logs are disabled
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
-            setIsAuthenticated(true);
-        }
-    }, []);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true); // ✅ Flag for delay
 
-    const handleLogin = (userData) => {
-        localStorage.setItem("authToken", userData.token);
-        localStorage.setItem("user", JSON.stringify(userData.user));
-        setUser(userData.user);
-        setIsAuthenticated(true);
-    };
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setIsAuthenticated(true);
+    }
+    setLoadingUser(false); // ✅ Finished loading user
+  }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("user");
-        setIsAuthenticated(false);
-        setUser(null);
-        window.location.reload();
-    };
+  const handleLogin = (userData) => {
+    localStorage.setItem("authToken", userData.token);
+    localStorage.setItem("user", JSON.stringify(userData.user));
+    setUser(userData.user);
+    setIsAuthenticated(true);
+  };
 
-    return (
-        <Router>
-            {/* ✅ Hide Navbar when admin is logged in */}
-            {!user || user.role !== "Admin" ? (
-                <Navbar isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} />
-            ) : null}
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+    setUser(null);
+    window.location.reload();
+  };
 
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/forgot" element={<ForgotPasswordSimple />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/aboutus" element={<AboutUs />} />
-                <Route path="/contactus" element={<ContactUs />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/student" element={<StudentDashboard />} />
-                <Route path="/cart" element={<ShoppingCart />} />
-                <Route path="/checkout/:orderId" element={<Checkout />} />
+  // ✅ Prevent rendering until user state is set
+  if (loadingUser) return null;
 
-                {/* Auth Redirects */}
-                <Route
-                    path="/login"
-                    element={
-                        <RedirectIfAuthenticated>
-                            <LoginPage />
-                        </RedirectIfAuthenticated>
-                    }
-                />
-                <Route
-                    path="/signup"
-                    element={
-                        <RedirectIfAuthenticated>
-                            <SignupPage />
-                        </RedirectIfAuthenticated>
-                    }
-                />
+  return (
+    <Router>
+      {/* ✅ Show navbar only for non-admin */}
+      {!user || user.role !== "Admin" ? (
+        <Navbar isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} />
+      ) : null}
 
-                {/* Admin Routes (Only If Admin) */}
-                {user && user.role === "Admin" ? (
-                    <Route path="/admin" element={<AdminPanel />}>
-                        <Route index element={<AdminDashboard />} />
-                        <Route path="courses" element={<ManageCourses />} />
-                        <Route path="students" element={<ManageStudents />} />
-                        <Route path="orders" element={<ManageOrders />} />
-                    </Route>
-                ) : (
-                    <Route path="/admin/*" element={<Navigate to="/403" replace />} />
-                )}
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/forgot" element={<ForgotPasswordSimple />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/aboutus" element={<AboutUs />} />
+        <Route path="/contactus" element={<ContactUs />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/cart" element={<ShoppingCart />} />
+        <Route path="/checkout/:orderId" element={<Checkout />} />
 
-                {/* Forbidden Fallback */}
-                <Route path="/403" element={<ForbiddenPage />} />
-            </Routes>
-        </Router>
-    );
+        {/* Auth Redirects */}
+        <Route
+          path="/login"
+          element={
+            <RedirectIfAuthenticated>
+              <LoginPage onLogin={handleLogin} />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <RedirectIfAuthenticated>
+              <SignupPage />
+            </RedirectIfAuthenticated>
+          }
+        />
+
+        {/* Admin Protected Routes */}
+        {user?.role?.trim().toLowerCase() === "admin" ? (
+          <Route path="/admin" element={<AdminPanel onLogout={handleLogout} />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="courses" element={<ManageCourses />} />
+            <Route path="students" element={<ManageStudents />} />
+            <Route path="orders" element={<ManageOrders />} />
+          </Route>
+        ) : (
+          <Route path="/admin/*" element={<Navigate to="/403" replace />} />
+        )}
+
+        {/* Forbidden fallback */}
+        <Route path="/403" element={<ForbiddenPage />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
+

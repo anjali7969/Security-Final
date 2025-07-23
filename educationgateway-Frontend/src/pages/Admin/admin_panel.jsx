@@ -147,11 +147,28 @@
 
 // export default AdminPanel;
 
-import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import Sidebar from "../../components/Sidebar";
 
 const AdminPanel = ({ onLogout }) => {
+    const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    useEffect(() => {
+  const timer = setTimeout(() => {
+    const freshUser = JSON.parse(localStorage.getItem("user"));
+    if (!freshUser || freshUser.role.toLowerCase() !== "admin") {
+      navigate("/403"); // ⛔ Prevent access if not admin
+    }
+  }, 200); // Wait 200ms to ensure user data is in localStorage
+
+  return () => clearTimeout(timer);
+}, []);
+
+
+
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* ✅ Sidebar */}
@@ -174,5 +191,6 @@ const AdminPanel = ({ onLogout }) => {
 };
 
 export default AdminPanel;
+
 
 
