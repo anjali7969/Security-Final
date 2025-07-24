@@ -4,6 +4,7 @@ const { protect } = require('../middlewares/authMiddleware'); // Ensure authenti
 
 const {
     createCourse,
+    updateCourse,
     getCourses,
     deleteCourse,
     checkEnrollment,
@@ -19,6 +20,8 @@ const router = express.Router();
 
 // Create a new course (Admin only)
 router.post('/create', upload, createCourse);
+
+router.put('/update/:id', updateCourse);
 
 // Get all courses (Accessible to all authenticated users)
 router.get('/all', getCourses);

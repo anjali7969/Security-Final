@@ -10,6 +10,9 @@ const connectDB = require("./config/db");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 
+// ✅ Rate Limiting
+const rateLimit = require("express-rate-limit");
+
 // ✅ Routers
 const userRouter = require("./router/userRouter");
 const courseRouter = require("./router/courseRouter");
@@ -35,7 +38,7 @@ app.use(cookieParser());
 // ✅ Enable CORS
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:4173"], // ✅ allow both dev and preview ports
+    origin: ["http://localhost:5173", "http://localhost:4173"],
     methods: ["GET", "POST", "PUT", "DELETE", "UPDATE"],
     credentials: true,
   })
@@ -53,11 +56,62 @@ app.use(session({
     }
 }));
 
-// ✅ Body Parsers — must come before CSRF middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ✅ DoS Payload Size Protection (10kb limit)
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
-// ✅ CSRF Protection (after cookieParser + session + body parser)
+// ✅ General Rate Limiter (100 requests per 15 min)
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: "Too many requests from this IP, please try again after 15 minutes.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(apiLimiter);
+
+// // ✅ Login Route Specific Rate Limiter (5 attempts per 10 min)
+// const loginLimiter = rateLimit({
+//     windowMs: 10 * 60 * 1000, // 10 minutes
+//     max: 5,
+//     message: "Too many login attempts. Try again in 10 minutes.",
+//     standardHeaders: true,
+//     legacyHeaders: false,
+// });
+// app.use("/auth/login", loginLimiter);
+
+// ✅ Register Route Rate Limiter (5 per 30 mins)
+const registerLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000, // 30 minutes
+    max: 5,
+    message: "Too many registration attempts. Please try again after 30 minutes.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use("/auth/register", registerLimiter);
+
+// ✅ Forgot Password Request Limiter (5 per 30 mins)
+const resetPasswordRequestLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000,
+    max: 5,
+    message: "Too many password reset requests. Please try again after 30 minutes.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use("/auth/reset-password-request", resetPasswordRequestLimiter);
+
+// ✅ Reset Password Rate Limiter (5 per 30 mins)
+const resetPasswordLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000,
+    max: 5,
+    message: "Too many reset attempts. Try again later.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use("/auth/reset-password", resetPasswordLimiter);
+
+
+// ✅ CSRF Protection
 const csrfProtection = csrf({ cookie: true });
 app.use(csrfProtection);
 
@@ -100,6 +154,14 @@ app.use("/wishlist", wishlistRouter);
 app.use("/order", orderRouter);
 app.use("/payment", paymentRouter);
 app.use("/enrollment", enrollmentRouter);
+
+// ✅ 413 Payload Too Large Handler
+app.use((err, req, res, next) => {
+    if (err.type === "entity.too.large") {
+        return res.status(413).json({ message: "Payload too large. Please reduce your request size." });
+    }
+    next(err);
+});
 
 // ✅ Error handling
 app.use((err, req, res, next) => {

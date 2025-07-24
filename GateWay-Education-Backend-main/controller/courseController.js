@@ -1,43 +1,115 @@
 const Course = require('../models/course');
 const Enrollment = require('../models/enrollment');
+const dns = require('dns').promises;
+const { URL } = require('url');
+
+
+// Helper to block private/internal IPs
+const isPrivateIP = (ip) => {
+  return (
+    /^127\./.test(ip) ||
+    /^10\./.test(ip) ||
+    /^192\.168\./.test(ip) ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip) ||
+    ip === '0.0.0.0' ||
+    ip === '::1'
+  );
+};
+
+// SSRF protection helper
+const validateURL = async (inputUrl) => {
+  try {
+    const urlObj = new URL(inputUrl);
+    const { hostname, protocol } = urlObj;
+
+    // Only allow http or https
+    if (!/^https?:$/.test(protocol)) return false;
+
+    // Resolve IP of hostname
+    const { address } = await dns.lookup(hostname);
+
+    if (isPrivateIP(address)) return false;
+
+    return true;
+  } catch (err) {
+    console.error("Invalid video URL:", err.message);
+    return false;
+  }
+};
 
 // ✅ Create a New Course (with Image Upload, Video URL, and Price)
 const createCourse = async (req, res) => {
+  try {
+    const { title, description, videoUrl, price } = req.body;
+
+    console.log("Uploaded File:", req.file);
+
+    let coursePrice = Number(price);
+
+    if (!title || !description || isNaN(coursePrice) || coursePrice < 0) {
+      return res.status(400).json({ message: "Title, description, and valid price are required" });
+    }
+
+    // ✅ SSRF Protection: Validate Video URL before using
+    if (videoUrl && !(await validateURL(videoUrl))) {
+      return res.status(400).json({ message: "Invalid or unsafe video URL" });
+    }
+
+    const imagePath = req.file ? `/uploads/courses/${req.file.filename}` : null;
+    console.log("Image Path:", imagePath);
+
+    const course = new Course({
+      title,
+      description,
+      videoUrl,
+      image: imagePath,
+      price: coursePrice,
+    });
+
+    await course.save();
+
+    res.status(201).json({ message: "Course created successfully", course });
+  } catch (error) {
+    console.error("Error creating course:", error.message);
+    res.status(500).json({ message: "Error creating course", error: error.message });
+  }
+};
+
+// ✅ Update Course (Title, Description, Price only)
+const updateCourse = async (req, res) => {
     try {
-        const { title, description, videoUrl, price } = req.body;
+        const courseId = req.params.id;
 
-        // ✅ Debugging: Log the uploaded file
-        console.log("Uploaded File:", req.file);
+        const updatedData = {
+            title: req.body.title,
+            description: req.body.description,
+            price: Number(req.body.price), // ✅ must be number
+        };
 
-        // ✅ Convert price to a number
-        let coursePrice = Number(price);
+        console.log("🧾 Raw Price from req.body:", req.body.price);
+        console.log("🔍 Type:", typeof req.body.price);
 
-        // ✅ Validate Required Fields
-        if (!title || !description || isNaN(coursePrice) || coursePrice < 0) {
-            return res.status(400).json({ message: "Title, description, and valid price are required" });
+        const updatedCourse = await Course.findByIdAndUpdate(
+            courseId,
+            updatedData,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedCourse) {
+            return res.status(404).json({ message: "Course not found" });
         }
 
-        // ✅ Store Image Path Correctly
-        const imagePath = req.file ? `/uploads/courses/${req.file.filename}` : null;
-        console.log("Image Path:", imagePath); // ✅ Debugging
-
-        // ✅ Create Course
-        const course = new Course({
-            title,
-            description,
-            videoUrl,
-            image: imagePath, // ✅ Store Image Correctly
-            price: coursePrice,
+        res.status(200).json({
+            message: "Course updated successfully",
+            course: updatedCourse,
         });
-
-        await course.save();
-
-        res.status(201).json({ message: "Course created successfully", course });
     } catch (error) {
-        console.error("Error creating course:", error.message);
-        res.status(500).json({ message: "Error creating course", error: error.message });
+        console.error("Update error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
+
+
 
 
 // ✅ Get All Courses
@@ -149,6 +221,7 @@ const deleteCourse = async (req, res) => {
 
 module.exports = {
     createCourse,
+    updateCourse,
     getCourses,
     enrollStudent,
     checkEnrollment,
