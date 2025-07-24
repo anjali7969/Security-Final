@@ -347,7 +347,7 @@ const handleDeleteOrder = async (orderId) => {
                             </div>
 
                             {/* Table Body */}
-                            {/* Table Body */}
+                            
                         <div className="divide-y divide-gray-200">
                         {orders.map((order) => (
                             <div key={order._id} className="px-6 py-6 hover:bg-gray-50 transition-colors duration-150">
