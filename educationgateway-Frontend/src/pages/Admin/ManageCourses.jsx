@@ -60,7 +60,7 @@ const ManageCourses = () => {
             formData.append("price", newCourse.price.replace(/[^\d]/g, ""));
             formData.append("profilePicture", newCourse.image);
 
-            const response = await axios.post("/course", formData, {
+            const response = await axios.post("/courses/create", formData, {
                 headers: {
                     "csrf-token": csrfToken,
                 },
@@ -80,7 +80,7 @@ const ManageCourses = () => {
     const handleDeleteCourse = async (id) => {
         if (window.confirm("Are you sure you want to delete this course?")) {
             try {
-                await axios.delete(`/course/${id}`, {
+                await axios.delete(`/courses/delete/${id}`, {
                     headers: {
                         "csrf-token": csrfToken,
                     },
@@ -100,42 +100,56 @@ const ManageCourses = () => {
     };
 
     // ✅ Handle Course Edit
-    const handleEditCourse = async () => {
-        if (!editCourse.title || !editCourse.description || !editCourse.price) {
-            toast.info("Title, Description, and Price are required.");
-            return;
-        }
+const handleEditCourse = async () => {
+  if (
+    !editCourse.title ||
+    !editCourse.description ||
+    editCourse.price === "" ||
+    isNaN(Number(editCourse.price))
+  ) {
+    toast.info("Title, Description, and valid Price are required.");
+    return;
+  }
 
-        try {
-            const response = await axios.put(
-                `/course/${editCourse._id}`,
-                {
-                    title: editCourse.title,
-                    description: editCourse.description,
-                    price: editCourse.price,
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "csrf-token": csrfToken,
-                    },
-                    withCredentials: true,
-                }
-            );
+  try {
+    const response = await axios.put(
+      `/courses/update/${editCourse._id}`,
+      {
+        title: editCourse.title,
+        description: editCourse.description,
+        price: Number(editCourse.price),
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "csrf-token": csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
 
-            const updatedCourse = response.data;
-            setCourses((prevCourses) =>
-                prevCourses.map((course) =>
-                    course._id === updatedCourse._id ? updatedCourse : course
-                )
-            );
+    const updatedCourse = response.data.course;
 
-            setIsEditModalOpen(false);
-            setEditCourse(null);
-        } catch (error) {
-            toast.error("Failed to update course. Please try again.");
-        }
-    };
+    // ✅ Replace updated course in UI
+    setCourses((prevCourses) =>
+      prevCourses.map((course) =>
+        course._id === updatedCourse._id ? updatedCourse : course
+      )
+    );
+
+    setIsEditModalOpen(false);
+    setEditCourse(null);
+    toast.success("Course updated successfully!");
+  } catch (error) {
+    console.error("❌ Edit Error:", error.response?.data || error.message);
+    toast.error("Failed to update course.");
+  }
+};
+
+
+
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -338,15 +352,19 @@ const ManageCourses = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Price (Rs.)</label>
                                     <input
-                                        type="text"
-                                        placeholder="Enter price"
-                                        value={newCourse.price}
-                                        onChange={(e) => setNewCourse({
-                                            ...newCourse,
-                                            price: e.target.value.replace(/[^\d]/g, "")
-                                        })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
+                                    type="number"
+                                    name="price"
+                                    value={editCourse.price || ""}
+                                    onChange={(e) =>
+                                        setEditCourse((prev) => ({
+                                        ...prev,
+                                        price: e.target.value === "" ? "" : Number(e.target.value),
+                                        }))
+                                    }
+                                    placeholder="Enter Price"
+                                    className="border w-full px-3 py-2 rounded"
                                     />
+
                                 </div>
                             </div>
 

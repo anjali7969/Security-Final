@@ -137,15 +137,24 @@ export const getCourses = async () => {
 
 // ✅ Update Course (NEW FUNCTION)
 
-export const updateCourse = async (courseId, updatedData) => {
+export const updateCourse = async (courseId, updatedData, csrfToken) => {
     try {
         const token = localStorage.getItem("authToken");
 
-        console.log("🔄 Updating Course:", updatedData); // Debugging Log
+        console.log("🔄 Updating Course:", updatedData); // ✅ Debug Log
 
-        const response = await api.put(`/courses/update/${courseId}`, updatedData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.put(
+            `/courses/update/${courseId}`,
+            updatedData,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    ...(csrfToken && { "csrf-token": csrfToken }) // ✅ Optional CSRF token
+                },
+                withCredentials: true // ✅ Ensure cookies (if needed)
+            }
+        );
 
         console.log("✅ Course Updated:", response.data);
         return response.data;
@@ -154,6 +163,7 @@ export const updateCourse = async (courseId, updatedData) => {
         throw error;
     }
 };
+
 
 
 // ✅ Delete Course
@@ -259,10 +269,28 @@ export const getAllOrders = async () => {
 };
 
 // ✅ Update Order Status
-export const updateOrderStatus = async (orderId, newStatus) => { // ✅ Correct export
+export const updateOrderStatus = async (orderId, newStatus) => {
     try {
+        const token = localStorage.getItem("authToken");
+
+        // ✅ Get CSRF token
+        const csrfRes = await api.get("/get-csrf-token");
+        const csrfToken = csrfRes.data.csrfToken;
+
         console.log(`📦 Updating order ${orderId} to ${newStatus}`);
-        const response = await api.put(`/order/update/${orderId}`, { status: newStatus });
+
+        const response = await api.put(
+            `/order/update/${orderId}`,
+            { status: newStatus },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "CSRF-Token": csrfToken,
+                },
+                withCredentials: true,
+            }
+        );
+
         return response.data;
     } catch (error) {
         console.error("❌ Error updating status:", error?.response?.data || error.message);
@@ -270,18 +298,32 @@ export const updateOrderStatus = async (orderId, newStatus) => { // ✅ Correct 
     }
 };
 
+
 // ✅ Delete Order
 export const deleteOrder = async (orderId) => {
     try {
-        console.log("🗑️ Deleting Order ID:", orderId);
-        const response = await api.delete(`/order/delete/${orderId}`);
+        const token = localStorage.getItem("authToken");
+
+        // ✅ Get fresh CSRF token
+        const csrfRes = await api.get("/get-csrf-token");
+        const csrfToken = csrfRes.data.csrfToken;
+
+        const response = await api.delete(`/order/delete/${orderId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "CSRF-Token": csrfToken,
+            },
+            withCredentials: true,
+        });
+
         console.log("✅ Order Deleted Successfully:", response.data);
         return response.data;
     } catch (error) {
-        console.error("❌ Error Deleting Order:", error?.response?.data?.message || error.message);
+        console.error("❌ Error Deleting Order:", error?.response?.data || error.message);
         throw error;
     }
 };
+
 
 // ✅ Get All Enrollments
 export const getAllEnrollments = async () => {

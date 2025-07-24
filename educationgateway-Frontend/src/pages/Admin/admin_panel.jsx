@@ -149,7 +149,6 @@
 
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import logo from "../../assets/images/logo.png";
 import Sidebar from "../../components/Sidebar";
 
 const AdminPanel = ({ onLogout }) => {
@@ -172,8 +171,8 @@ const AdminPanel = ({ onLogout }) => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* ✅ Sidebar */}
-            <div className="w-64 bg-white p-4 shadow-md flex flex-col items-center">
-                <img src={logo} className="h-14 w-auto mb-4" alt="Logo" />
+            <div className="w-64 bg-white p-4 shadow-xl flex flex-col items-center">
+                {/* <img src={logo} className="h-14 w-auto mb-4" alt="Logo" /> */}
                 <Sidebar onLogout={onLogout} />
             </div>
 

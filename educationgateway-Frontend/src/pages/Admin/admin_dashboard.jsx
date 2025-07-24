@@ -128,28 +128,28 @@
 
 
 import {
-    BarChart3,
-    Book,
-    GraduationCap,
-    ShoppingCart,
-    TrendingUp,
-    Users,
+  BarChart3,
+  Book,
+  GraduationCap,
+  ShoppingCart,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-    CartesianGrid,
-    LineChart,
-    Line as ReLine,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis
+  CartesianGrid,
+  LineChart,
+  Line as ReLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from "recharts";
 import {
-    getAllEnrollments,
-    getAllOrders,
-    getAllUsers,
-    getCourses,
+  getAllEnrollments,
+  getAllOrders,
+  getAllUsers,
+  getCourses,
 } from "../../api/api";
 
 const AdminDashboard = () => {
