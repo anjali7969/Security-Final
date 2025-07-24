@@ -27,7 +27,7 @@
 
 
 const express = require('express');
-const { registerUser, loginUser, getCurrentUser, resetPassword, resetPasswordRequest } = require('../controller/authController');
+const { registerUser, loginUser, verifyLoginOtp, getCurrentUser, resetPassword, resetPasswordRequest } = require('../controller/authController');
 const { isAdmin } = require('../middlewares/roleMiddleware');
 const { protect } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadsMiddleware');
@@ -41,6 +41,8 @@ router.post('/register', registerUser);
 
 // Login user
 router.post('/login', loginUser);
+
+router.post("/verify-login-otp", verifyLoginOtp);
 
 // get current user 
 router.get("/getCurrentUser", protect, getCurrentUser);

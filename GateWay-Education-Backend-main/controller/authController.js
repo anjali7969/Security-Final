@@ -5,6 +5,7 @@ const asyncHandler = require("express-async-handler");
 require('dotenv').config();
 const WelcomeEmail = require('../templets/WelcomeEmail');
 const ResetPasswordEmail = require('../templets/ResetPassword');
+const LoginOTPEmail = require('../templets/LoginOTPEmail');
 const logger = require('../middlewares/logger');
 const validator = require("validator"); // ✅ Import validator at top
 const CryptoJS = require("crypto-js");
@@ -104,7 +105,8 @@ const registerUser = async (req, res) => {
 
 
 
-// ✅ Login user (Student, Admin)
+
+// Login user (Student, Admin)
 const loginUser = async (req, res) => {
     try {
         let { email, password } = req.body;
@@ -123,7 +125,7 @@ const loginUser = async (req, res) => {
         // ✅ 2. Encrypt email to match encrypted DB value
         const encryptedEmail = encryptEmailDeterministic(email);
 
-        // ✅ 3. Find user using encrypted email (FIXED)
+        // ✅ 3. Find user using encrypted email
         const user = await User.findOne({ email: encryptedEmail })
             .select("+password +passwordLastChanged +failedLoginAttempts +lockUntil");
 
@@ -163,23 +165,47 @@ const loginUser = async (req, res) => {
         user.lockUntil = undefined;
         await user.save();
 
-        // ✅ 8. Generate JWT
-        const token = generateToken(user);
+        // ✅ 🔐 Skip 2FA for Admins
+        if (user.role === "Admin") {
+            const token = generateToken(user);
+            logger.info(`Admin ${user.email} logged in without OTP`);
+            return res.status(200).json({
+                success: true,
+                message: "Admin logged in successfully",
+                step: "authenticated",
+                token,
+                user: {
+                    _id: user._id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+            });
+        }
 
-        // ✅ 9. Logging
-        logger.info(`LOGIN - ${email} logged in`);
+        // ✅ 8. Generate OTP (for Student only)
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.loginOtp = otp;
+        user.loginOtpExpires = Date.now() + 5 * 60 * 1000;
+        await user.save();
 
-        // ✅ 10. Send response
-        res.status(200).json({
+        // ✅ 9. Send OTP styled email
+        const html = LoginOTPEmail({ email, otp });
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: "OTP Verification - Gateway Education Login",
+            html,
+        };
+        await transporter.sendMail(mailOptions);
+
+        // ✅ 10. Ask frontend to proceed to OTP verification step
+        return res.status(200).json({
             success: true,
-            message: "Login successful",
-            token,
-            user: {
-                _id: user._id,
-                name: user.name,
-                email, // return original plain email
-                role: user.role
-            }
+            message: "OTP sent to email. Please verify to complete login.",
+            step: "otp-verification",
+            userId: user._id,
+            email,
         });
 
     } catch (error) {
@@ -192,8 +218,52 @@ const loginUser = async (req, res) => {
 
 
 
+// controllers/authController.js (or wherever your login logic is)
+const verifyLoginOtp = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
 
+    if (!userId || !otp) {
+      return res.status(400).json({ message: "User ID and OTP are required" });
+    }
 
+    const user = await User.findById(userId).select("+loginOtp +loginOtpExpires");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.loginOtp || !user.loginOtpExpires || Date.now() > user.loginOtpExpires) {
+      return res.status(400).json({ message: "OTP is invalid or has expired" });
+    }
+
+    if (user.loginOtp !== otp) {
+      return res.status(400).json({ message: "Incorrect OTP" });
+    }
+
+    user.loginOtp = undefined;
+    user.loginOtpExpires = undefined;
+    await user.save();
+
+    const token = generateToken(user);
+
+    logger.info(`OTP VERIFIED - ${user.email} logged in`);
+
+    return res.status(200).json({
+      message: "OTP verified successfully",
+      tempUser: {
+        _id: user._id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+      },
+      tempToken: token,
+    });
+  } catch (error) {
+    console.error("OTP verification error:", error.message);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 
@@ -336,7 +406,7 @@ const resetPassword = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, getCurrentUser, uploadImage, resetPasswordRequest, resetPassword };
+module.exports = { registerUser, loginUser, verifyLoginOtp, getCurrentUser, uploadImage, resetPasswordRequest, resetPassword };
 
 
 
