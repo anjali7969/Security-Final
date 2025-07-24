@@ -122,7 +122,7 @@
 
 
 import { useEffect, useState } from "react";
-import { FiCheck, FiClock, FiDollarSign, FiMapPin, FiPackage, FiShoppingCart, FiTrash2, FiTruck } from "react-icons/fi";
+import { FiCheck, FiClock, FiDollarSign, FiPackage, FiShoppingCart, FiTrash2, FiTruck } from "react-icons/fi";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { deleteOrder, getAllOrders, updateOrderStatus } from "../../api/api";
@@ -337,96 +337,87 @@ const handleDeleteOrder = async (orderId) => {
                         <div className="overflow-hidden">
                             {/* Table Header */}
                             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                                <div className="grid grid-cols-12 gap-4 items-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    <div className="col-span-2">Order Details</div>
-                                    <div className="col-span-2">Customer</div>
-                                    <div className="col-span-1">Total</div>
-                                    <div className="col-span-3">Shipping Address</div>
-                                    <div className="col-span-2">Status</div>
-                                    <div className="col-span-2">Actions</div>
-                                </div>
+                            <div className="grid grid-cols-10 gap-4 items-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div className="col-span-3">Order Details</div>
+                                <div className="col-span-2">Customer</div>
+                                <div className="col-span-1">Total</div>
+                                <div className="col-span-2">Status</div>
+                                <div className="col-span-2">Actions</div>
+                            </div>
                             </div>
 
                             {/* Table Body */}
-                            <div className="divide-y divide-gray-200">
-                                {orders.map((order) => (
-                                    <div key={order._id} className="px-6 py-6 hover:bg-gray-50 transition-colors duration-150">
-                                        <div className="grid grid-cols-12 gap-4 items-center">
-                                            {/* Order Details */}
-                                            <div className="col-span-2">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                                        <FiPackage className="w-5 h-5 text-indigo-600" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-sm font-semibold text-gray-900">#{order._id.slice(-8)}</h3>
-                                                        <p className="text-xs text-gray-500">Order ID</p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                            {/* Table Body */}
+                        <div className="divide-y divide-gray-200">
+                        {orders.map((order) => (
+                            <div key={order._id} className="px-6 py-6 hover:bg-gray-50 transition-colors duration-150">
+                            <div className="grid grid-cols-10 gap-4 items-center">
 
-                                            {/* Customer */}
-                                            <div className="col-span-2">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                                                        {(order.user?.name || "U").charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-900">{order.user?.name || "Unknown"}</p>
-                                                        <p className="text-xs text-gray-500">Customer</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Total */}
-                                            <div className="col-span-1">
-                                                <div className="flex items-center space-x-1">
-                                                    <FiDollarSign className="w-4 h-4 text-emerald-600" />
-                                                    <span className="text-lg font-bold text-emerald-600">{order.totalAmount}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Shipping Address */}
-                                            <div className="col-span-3">
-                                                <div className="flex items-start space-x-2">
-                                                    <FiMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                                    <p className="text-sm text-gray-700 line-clamp-2">{order.address}</p>
-                                                </div>
-                                            </div>
-
-                                            {/* Status */}
-                                            <div className="col-span-2">
-                                                <select
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
-                                                    value={order.status}
-                                                    onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
-                                                >
-                                                    <option value="pending">Pending</option>
-                                                    <option value="confirmed">Confirmed</option>
-                                                    <option value="shipped">Shipped</option>
-                                                </select>
-                                                <div className="mt-2">
-                                                    <span className={getStatusBadge(order.status)}>
-                                                        {getStatusIcon(order.status)}
-                                                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Actions */}
-                                            <div className="col-span-2">
-                                                <button
-                                                    onClick={() => handleDeleteOrder(order._id)}
-                                                    className="inline-flex items-center px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors duration-150 text-sm font-medium"
-                                                >
-                                                    <FiTrash2 className="w-4 h-4 mr-2" />
-                                                    Cancel Order
-                                                </button>
-                                            </div>
-                                        </div>
+                                {/* Order Details */}
+                                <div className="col-span-3">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                    <FiPackage className="w-5 h-5 text-indigo-600" />
                                     </div>
-                                ))}
+                                    <div>
+                                    <h3 className="text-sm font-semibold text-gray-900">#{order._id.slice(-8)}</h3>
+                                    <p className="text-xs text-gray-500">Order ID</p>
+                                    </div>
+                                </div>
+                                </div>
+
+                                {/* Customer */}
+                                <div className="col-span-2">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                    {(order.user?.name || "U").charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                    <p className="text-sm font-medium text-gray-900">{order.user?.name || "Unknown"}</p>
+                                    <p className="text-xs text-gray-500">Customer</p>
+                                    </div>
+                                </div>
+                                </div>
+
+                                {/* Total */}
+                                <div className="col-span-1">
+                                <div className="flex items-center space-x-1">
+                                    <FiDollarSign className="w-4 h-4 text-emerald-600" />
+                                    <span className="text-lg font-bold text-emerald-600">{order.totalAmount}</span>
+                                </div>
+                                </div>
+
+                                {/* Status */}
+                                <div className="col-span-2 flex flex-col justify-start gap-1">
+                                <select
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
+                                    value={order.status}
+                                    onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="shipped">Shipped</option>
+                                </select>
+                                <span className={getStatusBadge(order.status)}>
+                                    {getStatusIcon(order.status)}
+                                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                </span>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="col-span-2">
+                                <button
+                                    onClick={() => handleDeleteOrder(order._id)}
+                                    className="inline-flex items-center px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors duration-150 text-sm font-medium"
+                                >
+                                    <FiTrash2 className="w-4 h-4 mr-2" />
+                                    Cancel Order
+                                </button>
+                                </div>
                             </div>
+                            </div>
+                        ))}
+                        </div>
                         </div>
                     )}
                 </div>

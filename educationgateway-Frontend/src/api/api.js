@@ -85,7 +85,6 @@ export const getAllUsers = async () => {
     }
 };
 
-// ✅ Update User (Including Role Change)
 export const updateUser = async (userId, updatedData) => {
     const token = localStorage.getItem("authToken");
     const response = await api.put(`/user/update/${userId}`, updatedData, {
@@ -94,13 +93,14 @@ export const updateUser = async (userId, updatedData) => {
     return response.data;
 };
 
-// ✅ Delete User
 export const deleteUser = async (userId) => {
     const token = localStorage.getItem("authToken");
     await api.delete(`/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
 };
+
+
 
 // ✅ Create a New Course
 export const createCourse = async (courseData) => {

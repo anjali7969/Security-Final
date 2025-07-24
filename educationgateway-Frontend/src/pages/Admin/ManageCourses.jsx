@@ -310,177 +310,174 @@ const handleEditCourse = async () => {
             </div>
 
             {/* ✅ Edit Course Modal */}
-            {isEditModalOpen && editCourse && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-semibold text-gray-900">Edit Course</h3>
-                                <button 
-                                    onClick={() => setIsEditModalOpen(false)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors duration-150"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
+            {isEditModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-gray-900">Edit Course</h3>
+          <button 
+            onClick={() => setIsEditModalOpen(false)}
+            className="text-gray-400 hover:text-gray-600 transition-colors duration-150"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Course Title</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Enter course title" 
-                                        value={editCourse.title} 
-                                        onChange={(e) => setEditCourse({ ...editCourse, title: e.target.value })} 
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
-                                    />
-                                </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Course Title</label>
+            <input 
+              type="text" 
+              placeholder="Enter course title" 
+              value={editCourse?.title || ""} 
+              onChange={(e) => setEditCourse({ ...editCourse, title: e.target.value })} 
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 placeholder-gray-500"
+            />
+          </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                    <textarea 
-                                        placeholder="Enter course description" 
-                                        value={editCourse.description} 
-                                        onChange={(e) => setEditCourse({ ...editCourse, description: e.target.value })} 
-                                        rows={4}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150 resize-none"
-                                    />
-                                </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea 
+              placeholder="Enter course description" 
+              value={editCourse?.description || ""} 
+              onChange={(e) => setEditCourse({ ...editCourse, description: e.target.value })} 
+              rows={4}
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 placeholder-gray-500 resize-none"
+            />
+          </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Price (Rs.)</label>
-                                    <input
-                                    type="number"
-                                    name="price"
-                                    value={editCourse.price || ""}
-                                    onChange={(e) =>
-                                        setEditCourse((prev) => ({
-                                        ...prev,
-                                        price: e.target.value === "" ? "" : Number(e.target.value),
-                                        }))
-                                    }
-                                    placeholder="Enter Price"
-                                    className="border w-full px-3 py-2 rounded"
-                                    />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price (Rs.)</label>
+            <input
+              type="text"
+              placeholder="Enter price"
+              value={editCourse?.price || ""}
+              onChange={(e) =>
+                setEditCourse({ ...editCourse, price: e.target.value.replace(/[^\d]/g, "") })
+              }
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 placeholder-gray-500"
+            />
+          </div>
+        </div>
 
-                                </div>
-                            </div>
+        <div className="flex justify-end space-x-3 mt-8">
+          <button 
+            onClick={() => setIsEditModalOpen(false)} 
+            className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={handleEditCourse} 
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition"
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
-                            <div className="flex justify-end space-x-3 mt-8">
-                                <button 
-                                    onClick={() => setIsEditModalOpen(false)} 
-                                    className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-150"
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    onClick={handleEditCourse} 
-                                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-150"
-                                >
-                                    Save Changes
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* ✅ Modal for Adding Course */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-semibold text-gray-900">Add New Course</h3>
-                                <button 
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors duration-150"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900">Add New Course</h3>
+                    <button 
+                        onClick={() => setIsModalOpen(false)}
+                        className="text-gray-400 hover:text-gray-600 transition-colors duration-150"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Course Title</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Enter course title" 
-                                        value={newCourse.title} 
-                                        onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })} 
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
-                                    />
-                                </div>
+                    <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Course Title</label>
+                        <input 
+                        type="text" 
+                        placeholder="Enter course title" 
+                        value={newCourse.title} 
+                        onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })} 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 placeholder-gray-500"
+                        />
+                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                    <textarea 
-                                        placeholder="Enter course description" 
-                                        value={newCourse.description} 
-                                        onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })} 
-                                        rows={4}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150 resize-none"
-                                    />
-                                </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea 
+                        placeholder="Enter course description" 
+                        value={newCourse.description} 
+                        onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })} 
+                        rows={4}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 placeholder-gray-500 resize-none"
+                        />
+                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Video URL</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Enter video URL" 
-                                        value={newCourse.videoUrl} 
-                                        onChange={(e) => setNewCourse({ ...newCourse, videoUrl: e.target.value })} 
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
-                                    />
-                                </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                        <input 
+                        type="text" 
+                        placeholder="Enter video URL" 
+                        value={newCourse.videoUrl} 
+                        onChange={(e) => setNewCourse({ ...newCourse, videoUrl: e.target.value })} 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 placeholder-gray-500"
+                        />
+                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Price (Rs.)</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter price"
-                                        value={newCourse.price}
-                                        onChange={(e) => setNewCourse({
-                                            ...newCourse,
-                                            price: e.target.value.replace(/[^\d]/g, "")
-                                        })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
-                                    />
-                                </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Price (Rs.)</label>
+                        <input
+                        type="text"
+                        placeholder="Enter price"
+                        value={newCourse.price}
+                        onChange={(e) => setNewCourse({
+                            ...newCourse,
+                            price: e.target.value.replace(/[^\d]/g, "")
+                        })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 placeholder-gray-500"
+                        />
+                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Course Image</label>
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={(e) => setNewCourse({ ...newCourse, image: e.target.files[0] })} 
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                    />
-                                </div>
-                            </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Course Image</label>
+                        <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={(e) => setNewCourse({ ...newCourse, image: e.target.files[0] })} 
+                        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-gray-300 rounded-md cursor-pointer bg-white"
+                        />
+                    </div>
+                    </div>
 
-                            <div className="flex justify-end space-x-3 mt-8">
-                                <button 
-                                    onClick={() => setIsModalOpen(false)} 
-                                    className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-150"
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    onClick={handleAddCourse} 
-                                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-150"
-                                >
-                                    Add Course
-                                </button>
-                            </div>
-                        </div>
+                    <div className="flex justify-end space-x-3 mt-8">
+                    <button 
+                        onClick={() => setIsModalOpen(false)} 
+                        className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onClick={handleAddCourse} 
+                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition"
+                    >
+                        Add Course
+                    </button>
                     </div>
                 </div>
+                </div>
+            </div>
             )}
+
         </div>
     );
 };
