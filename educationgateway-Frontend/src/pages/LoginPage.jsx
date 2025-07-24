@@ -183,7 +183,6 @@ const handleLogin = async () => {
 
   try {
     setLoading(true);
-
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
 
@@ -206,22 +205,34 @@ const handleLogin = async () => {
       return;
     }
 
-    console.log("🧾 Logged in user:", res.user);
+    // ✅ Corrected OTP Flow — Student
+if (res.step === "otp-verification" && res.userId) {
+  localStorage.setItem("tempUser", JSON.stringify({ email, _id: res.userId })); // 👈 fixed here
+  localStorage.setItem("tempStep", "otp");
+  return navigate("/verify-login-otp");
+}
 
-    localStorage.setItem("user", JSON.stringify(res.user));
-    localStorage.setItem("authToken", res.token);
 
-    // ✅ New: Delay + verify user again from localStorage before redirect
-    setTimeout(() => {
-      const freshUser = JSON.parse(localStorage.getItem("user"));
-      if (freshUser?.role === "Admin") {
-        navigate("/admin");
-      } else if (freshUser?.role === "Student") {
-        navigate("/student");
-      } else {
-        navigate("/");
-      }
-    }, 200); // Give storage time to commit
+    // ✅ No OTP needed — store normally
+    if (res.user && res.token) {
+      localStorage.setItem("user", JSON.stringify(res.user));
+      localStorage.setItem("authToken", res.token);
+
+      setTimeout(() => {
+        const rawUser = localStorage.getItem("user");
+        const freshUser = rawUser ? JSON.parse(rawUser) : null;
+
+        if (freshUser?.role === "Admin") {
+          navigate("/admin");
+        } else if (freshUser?.role === "Student") {
+          navigate("/student");
+        } else {
+          navigate("/");
+        }
+      }, 200);
+    } else {
+      setError("Login response missing required data.");
+    }
 
   } catch (error) {
     console.error("❌ Login Failed:", error.response?.data || error.message);
@@ -230,6 +241,8 @@ const handleLogin = async () => {
     setLoading(false);
   }
 };
+
+
 
 
   return (

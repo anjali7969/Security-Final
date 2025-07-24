@@ -106,6 +106,7 @@ import LoginPage from "./pages/LoginPage";
 import ResetPassword from "./pages/ResetPassword";
 import SignupPage from "./pages/SignupPage";
 import StudentDashboard from "./pages/Student/student_dashboard";
+import VerifyLoginOtp from "./pages/VerifyLoginOtp";
 import RedirectIfAuthenticated from "./routes/RedirectIfAuthenticated";
 
 function App() {
@@ -116,14 +117,22 @@ function App() {
   const [loadingUser, setLoadingUser] = useState(true); // ✅ Flag for delay
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+  const storedUser = localStorage.getItem("user");
+
+  try {
+    if (storedUser && storedUser !== "undefined") {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
       setIsAuthenticated(true);
     }
-    setLoadingUser(false); // ✅ Finished loading user
-  }, []);
+  } catch (err) {
+    console.error("❌ Failed to parse user from localStorage:", err);
+    localStorage.removeItem("user");
+  }
+
+  setLoadingUser(false); // ✅ Finished loading user
+}, []);
+
 
   const handleLogin = (userData) => {
     localStorage.setItem("authToken", userData.token);
@@ -161,6 +170,8 @@ function App() {
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/cart" element={<ShoppingCart />} />
         <Route path="/checkout/:orderId" element={<Checkout />} />
+        <Route path="/verify-login-otp" element={<VerifyLoginOtp />} />
+
 
         {/* Auth Redirects */}
         <Route
