@@ -99,3 +99,49 @@
 2025-07-24 21:18:19 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
 2025-07-24 21:31:07 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
 2025-07-24 21:31:34 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-27 20:03:39 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-27 20:04:08 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-27 21:09:50 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-27 21:12:28 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-27 21:18:18 [INFO]: REGISTER - anjalishrestha024@gmail.com registered with role Student
+2025-07-27 21:18:53 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-27 21:46:57 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-27 21:50:41 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-27 21:50:55 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-27 21:51:12 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-27 23:25:23 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-27 23:36:12 [ERROR]: [object Object]
+2025-07-27 23:36:53 [ERROR]: [object Object]
+2025-07-27 23:47:34 [ERROR]: [object Object]
+2025-07-27 23:51:38 [WARN]: [object Object]
+2025-07-27 23:52:00 [WARN]: [object Object]
+2025-07-27 23:52:14 [WARN]: [object Object]
+2025-07-27 23:57:29 [WARN]: {"event":"Login Failed - No User","email":"anjalishrestha024@gmail.com","ip":"::1"}
+2025-07-27 23:57:37 [WARN]: {"event":"Login Failed - No User","email":"anjali0@gmail.com","ip":"::1"}
+2025-07-28 00:02:36 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-28 00:03:28 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-28 00:03:49 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-28 00:16:36 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-28 00:22:54 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-28 00:29:53 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-28 00:32:21 [INFO]: REGISTER - qwerty@gmail.com registered with role Student
+2025-07-28 00:33:29 [INFO]: OTP VERIFIED - 2afdda81840e285c803db034a368a77cee62c3441fa1fd75ca773d4127fba47b logged in
+2025-07-28 00:35:26 [INFO]: REGISTER - anjalishrestha373@gmail.com registered with role Student
+2025-07-28 00:36:27 [INFO]: OTP VERIFIED - a621ade13e3a296abea1cdacfc80b37f0897d9a03d4fed8872d4d9a9cc19fc15 logged in
+2025-07-28 00:38:13 [INFO]: PASSWORD RESET - anjalishrestha373@gmail.com reset their password
+2025-07-28 11:13:54 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-28 11:16:08 [INFO]: REGISTER - shresthaanjali049@gmail.com registered with role Student
+2025-07-28 11:28:15 [INFO]: OTP VERIFIED - afef9cbf10c3213e490293591404b1a325d2136780cd7e5d7f4bd89d89a9243b logged in
+2025-07-28 11:28:50 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-28 11:29:16 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-28 11:29:38 [INFO]: Admin d5c3aa29bd720e5dc0e3409a126b6d09d11d1fdbe3be5af5e05f819eee99cbbd logged in without OTP
+2025-07-28 12:08:02 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-28 12:19:10 [INFO]: REGISTER - anjalishrestha024@gmail.com registered with role Student
+2025-07-28 12:20:03 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-28 12:21:30 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-28 12:51:58 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-28 13:33:43 [INFO]: REGISTER - anjalishrestha024@gmail.com registered with role Student
+2025-07-28 13:34:16 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-28 20:30:21 [INFO]: OTP VERIFIED - d1e7735bda5101f005b82f292d2484510453165c0b84106a0c0163a9f6d55d10 logged in
+2025-07-28 21:16:33 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password
+2025-07-28 21:24:30 [INFO]: PASSWORD RESET - anjalishrestha024@gmail.com reset their password

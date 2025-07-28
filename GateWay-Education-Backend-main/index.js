@@ -5,6 +5,8 @@ const helmet = require("helmet");
 const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
+require("dotenv").config(); // ✅ Loads .env before anything else
+
 
 // ✅ Input Sanitization
 const mongoSanitize = require("express-mongo-sanitize");
@@ -23,6 +25,7 @@ const wishlistRouter = require("./router/wishlistRouter");
 const orderRouter = require("./router/orderRouter");
 const enrollmentRouter = require("./router/enrollmentRouter");
 const paymentRouter = require("./router/paymentRouter");
+const adminRouter = require("./router/adminRouter");
 
 const app = express();
 
@@ -61,14 +64,12 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 // ✅ General Rate Limiter (100 requests per 15 min)
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100,
-    message: "Too many requests from this IP, please try again after 15 minutes.",
-    standardHeaders: true,
-    legacyHeaders: false,
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // Allow 100 requests per minute per IP
+  message: "Too many requests. Please slow down.",
 });
-app.use(apiLimiter);
+app.use(limiter);
 
 // // ✅ Login Route Specific Rate Limiter (5 attempts per 10 min)
 // const loginLimiter = rateLimit({
@@ -154,6 +155,8 @@ app.use("/wishlist", wishlistRouter);
 app.use("/order", orderRouter);
 app.use("/payment", paymentRouter);
 app.use("/enrollment", enrollmentRouter);
+app.use("/admin", adminRouter);
+
 
 // ✅ 413 Payload Too Large Handler
 app.use((err, req, res, next) => {

@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["Admin", "Student"], default: "Student" },
 
     // 🔐 Security Enhancements
-    passwordHistory: { type: [String], default: [] },
+    previousPasswords: { type: [String], default: [], select: false }, // ✅ For reuse prevention
     passwordLastChanged: { type: Date, default: Date.now },
 
     resetPasswordToken: String,
@@ -33,23 +33,36 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
 // 🔒 Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+
+  // ✅ Update password last changed
+  this.passwordLastChanged = new Date();
   next();
 });
 
 // 🔒 Hash password before update if changed
 userSchema.pre("findOneAndUpdate", async function (next) {
-  if (!this._update.password) return next();
+  const update = this.getUpdate();
 
-  const salt = await bcrypt.genSalt(10);
-  this._update.password = await bcrypt.hash(this._update.password, salt);
+  if (update.password) {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(update.password, salt);
+
+    update.password = hashedPassword;
+    update.passwordLastChanged = new Date(); // ✅ Correctly attach here
+
+    this.setUpdate(update);
+  }
+
   next();
 });
+
 
 // 🔑 Generate JWT Token
 userSchema.methods.getSignedJwtToken = function () {

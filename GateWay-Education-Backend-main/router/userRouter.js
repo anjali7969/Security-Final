@@ -41,10 +41,6 @@ router.put("/change-password/:id", authentication, (req, res, next) => {
 });
 
 
-
-
-
-
 // ✅ Get user by ID (Admin or the User Themselves)
 router.get("/:id", authentication, (req, res, next) => {
     if (req.user.role === "Admin" || req.user.id === req.params.id) {

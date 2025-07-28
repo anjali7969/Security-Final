@@ -69,13 +69,14 @@ const registerUser = async (req, res) => {
 
         // ✅ Create new user with encrypted email
         const user = await User.create({
-            name,
-            email: encryptedEmail,
-            password,
-            phone,
-            role,
+        name,
+        email: encryptedEmail,
+        password,
+        phone,
+        role,
+        passwordLastChanged: new Date() // ✅ Add this line
+    });
 
-        });
 
         const token = generateToken(user);
 
@@ -353,7 +354,7 @@ const resetPassword = async (req, res) => {
     try {
         const { token, newPassword } = req.body;
 
-        console.log("🔹 Received Token for Reset:", token);  // Debugging Step
+        console.log("🔹 Received Token for Reset:", token);
 
         // ✅ Verify the reset token
         let decoded;
@@ -364,47 +365,65 @@ const resetPassword = async (req, res) => {
             return res.status(400).json({ message: "Invalid or expired reset token" });
         }
 
-        console.log("🔹 Decoded Token:", decoded);
-
-        // ✅ Find the user associated with the token
-        const user = await User.findById(decoded.user_id);
+        // ✅ Find the user (include password & previousPasswords for reuse check)
+        const user = await User.findById(decoded.user_id).select("+password +previousPasswords");
         if (!user) {
             console.error("❌ User Not Found");
             return res.status(404).json({ message: "User not found" });
         }
 
-        console.log("🔹 User Found:", user.email);
-
-        // ✅ Ensure new password is provided
+        // ✅ Validate password strength
         const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
-
         if (!newPassword) {
             return res.status(400).json({ message: "Password is required" });
         }
-
         if (!strongPasswordRegex.test(newPassword)) {
             return res.status(400).json({
                 message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
-        });
-    }
+            });
+        }
 
+        // ✅ Check against current password
+        const isSame = await bcrypt.compare(newPassword, user.password);
+        if (isSame) {
+            return res.status(400).json({ message: "New password cannot be the same as the old password." });
+        }
 
-        // ✅ Set new password (Mongoose will trigger the pre("save") middleware)
+        // ✅ Check against previous 2 passwords
+        const lastTwo = [...(user.previousPasswords || [])].slice(-2);
+        for (let i = 0; i < lastTwo.length; i++) {
+            const isReused = await bcrypt.compare(newPassword, lastTwo[i]);
+            if (isReused) {
+                return res.status(400).json({
+                    message: "You cannot reuse your last 2 passwords.",
+                });
+            }
+        }
+
+        // ✅ Save current password into history (keep last 2)
+        user.previousPasswords = [...(user.previousPasswords || []), user.password].slice(-2);
+
+        // ✅ Update password (hashed by pre-save hook)
         user.password = newPassword;
-        user.markModified("password");  // 🔥 Ensure Mongoose detects the change
-        await user.save(); // ✅ Triggers pre("save") middleware automatically
+        user.passwordLastChanged = new Date();
 
-        // ✅ Add Audit Log
+        await user.save();
+
+        // ✅ Audit log
         logger.info(`PASSWORD RESET - ${user.email} reset their password`);
-
         console.log("✅ Password Updated Successfully in Database!");
 
-        return res.status(200).json({ message: "Password reset successfully. You can now log in with your new password." });
+        return res.status(200).json({
+            message: "Password reset successfully. You can now log in with your new password.",
+        });
     } catch (error) {
         console.error("❌ Error resetting password:", error);
         return res.status(500).json({ message: "Server error", error });
     }
 };
+
+
+
 
 module.exports = { registerUser, loginUser, verifyLoginOtp, getCurrentUser, uploadImage, resetPasswordRequest, resetPassword };
 
