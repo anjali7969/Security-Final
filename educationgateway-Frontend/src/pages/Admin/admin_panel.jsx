@@ -147,46 +147,87 @@
 
 // export default AdminPanel;
 
+// import { useEffect } from "react";
+// import { Outlet, useNavigate } from "react-router-dom";
+// import Sidebar from "../../components/Sidebar";
+
+// const AdminPanel = ({ onLogout }) => {
+//     const navigate = useNavigate();
+//     const user = JSON.parse(localStorage.getItem("user"));
+
+//     useEffect(() => {
+//   const timer = setTimeout(() => {
+//     const freshUser = JSON.parse(localStorage.getItem("user"));
+//     if (!freshUser || freshUser.role.toLowerCase() !== "admin") {
+//       navigate("/403"); // ⛔ Prevent access if not admin
+//     }
+//   }, 200); // Wait 200ms to ensure user data is in localStorage
+
+//   return () => clearTimeout(timer);
+// }, []);
+
+
+
+//     return (
+//         <div className="flex min-h-screen bg-gray-100">
+//             {/* ✅ Sidebar */}
+//             <div className="w-64 bg-white p-4 shadow-xl flex flex-col items-center">
+//                 {/* <img src={logo} className="h-14 w-auto mb-4" alt="Logo" /> */}
+//                 <Sidebar onLogout={onLogout} />
+//             </div>
+
+//             {/* ✅ Main Content */}
+//             <div className="flex-1 p-6">
+//                 <h2 className="text-2xl font-semibold text-gray-800 mb-6">Welcome, Admin!</h2>
+
+//                 {/* ✅ Dynamic Content (Other Pages will be Rendered Here) */}
+//                 <div className="mt-6">
+//                     <Outlet />
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default AdminPanel;
+
+
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 
 const AdminPanel = ({ onLogout }) => {
-    const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate();
 
-    useEffect(() => {
-  const timer = setTimeout(() => {
-    const freshUser = JSON.parse(localStorage.getItem("user"));
-    if (!freshUser || freshUser.role.toLowerCase() !== "admin") {
-      navigate("/403"); // ⛔ Prevent access if not admin
-    }
-  }, 200); // Wait 200ms to ensure user data is in localStorage
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const freshUser = JSON.parse(localStorage.getItem("user"));
+      if (!freshUser || freshUser.role.toLowerCase() !== "admin") {
+        navigate("/403");
+      }
+    }, 200);
 
-  return () => clearTimeout(timer);
-}, []);
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      {/* ✅ Sidebar */}
+      <Sidebar onLogout={onLogout} />
 
+      {/* ✅ Main Content - Add margin-left to make room for fixed sidebar */}
+      <div className="flex-1 ml-64 p-6">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+          Welcome, Admin!
+        </h2>
 
-    return (
-        <div className="flex min-h-screen bg-gray-100">
-            {/* ✅ Sidebar */}
-            <div className="w-64 bg-white p-4 shadow-xl flex flex-col items-center">
-                {/* <img src={logo} className="h-14 w-auto mb-4" alt="Logo" /> */}
-                <Sidebar onLogout={onLogout} />
-            </div>
-
-            {/* ✅ Main Content */}
-            <div className="flex-1 p-6">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Welcome, Admin!</h2>
-
-                {/* ✅ Dynamic Content (Other Pages will be Rendered Here) */}
-                <div className="mt-6">
-                    <Outlet />
-                </div>
-            </div>
+        {/* ✅ Page Content Rendered Here */}
+        <div className="mt-6">
+          <Outlet />
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default AdminPanel;

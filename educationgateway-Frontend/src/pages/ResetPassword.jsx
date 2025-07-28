@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/NavBar";
 
@@ -30,16 +30,12 @@ const ResetPassword = () => {
         setLoading(true);
 
         try {
-            await axios.post("http://localhost:5003/auth/reset-password",
+            await axios.post(
+                "http://localhost:5003/auth/reset-password",
+                { token, newPassword },
                 {
-                    token,
-                    newPassword,
-                },
-                {
-                    headers: {
-                        "csrf-token": csrfToken
-                    },
-                    withCredentials: true
+                    headers: { "X-CSRF-Token": csrfToken },
+                    withCredentials: true,
                 }
             );
 
@@ -54,10 +50,27 @@ const ResetPassword = () => {
                 navigate("/");
             }, 3000);
         } catch (err) {
-            toast.error(err.response?.data?.message || "Error resetting password.", {
-                position: "top-right",
-                autoClose: 3000,
-            });
+            const errorMsg = err.response?.data?.message || "Error resetting password.";
+            const lowerMsg = errorMsg.toLowerCase();
+
+            const reusePhrases = [
+                "same as the old password",
+                "reuse your last 2 passwords",
+                "reuse your previous",
+                "reuse your current",
+            ];
+
+            if (reusePhrases.some((phrase) => lowerMsg.includes(phrase))) {
+                toast.warn("You cannot reuse your current or previous password.", {
+                    position: "top-right",
+                    autoClose: 3000,
+                });
+            } else {
+                toast.error(errorMsg, {
+                    position: "top-right",
+                    autoClose: 3000,
+                });
+            }
         }
 
         setLoading(false);
@@ -66,6 +79,7 @@ const ResetPassword = () => {
     return (
         <div className="bg-white min-h-screen">
             <Navbar />
+            <ToastContainer position="top-right" autoClose={3000} />
 
             <div className="flex items-center justify-center min-h-[80vh] px-4">
                 <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full border border-gray-200">
@@ -115,8 +129,16 @@ const ResetPassword = () => {
 
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition shadow-md"
+                            disabled={
+                                loading ||
+                                !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(newPassword)
+                            }
+                            className={`w-full py-3 rounded-lg transition shadow-md ${
+                                loading ||
+                                !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(newPassword)
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-600 text-white hover:bg-blue-700"
+                            }`}
                         >
                             {loading ? "Resetting..." : "Reset Password"}
                         </button>

@@ -135,13 +135,12 @@
 import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import axios from "../api/axiosInstance";
-
 import {
   LoadCanvasTemplate,
   loadCaptchaEnginge,
   validateCaptcha,
 } from "react-simple-captcha";
+import axios from "../api/axiosInstance";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -155,95 +154,93 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadCaptchaEnginge(6); // Load CAPTCHA
-
+    loadCaptchaEnginge(6);
     const fetchToken = async () => {
       try {
-        const res = await axios.get("/get-csrf-token", {
-          withCredentials: true,
-        });
+        const res = await axios.get("/get-csrf-token", { withCredentials: true });
         setCsrfToken(res.data.csrfToken);
       } catch (err) {
         console.error("❌ Failed to fetch CSRF token", err);
       }
     };
-
     fetchToken();
   }, []);
 
-  // ✅ Your full code stays intact, below is the only change inside handleLogin()
+  const handleLogin = async () => {
+    setError("");
 
-const handleLogin = async () => {
-  setError("");
-
-  if (!validateCaptcha(captchaInput)) {
-    setError("❌ Invalid CAPTCHA. Please try again.");
-    return;
-  }
-
-  try {
-    setLoading(true);
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-
-    const response = await axios.post(
-      "/auth/login",
-      { email, password },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "csrf-token": csrfToken,
-        },
-        withCredentials: true,
-      }
-    );
-
-    const res = response.data;
-
-    if (!res.success) {
-      setError(res.message || "Invalid login credentials.");
+    if (!validateCaptcha(captchaInput)) {
+      setError("❌ Invalid CAPTCHA. Please try again.");
       return;
     }
 
-    // ✅ Corrected OTP Flow — Student
-if (res.step === "otp-verification" && res.userId) {
-  localStorage.setItem("tempUser", JSON.stringify({ email, _id: res.userId })); // 👈 fixed here
-  localStorage.setItem("tempStep", "otp");
-  return navigate("/verify-login-otp");
-}
+    try {
+      setLoading(true);
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
 
-
-    // ✅ No OTP needed — store normally
-    if (res.user && res.token) {
-      localStorage.setItem("user", JSON.stringify(res.user));
-      localStorage.setItem("authToken", res.token);
-
-      setTimeout(() => {
-        const rawUser = localStorage.getItem("user");
-        const freshUser = rawUser ? JSON.parse(rawUser) : null;
-
-        if (freshUser?.role === "Admin") {
-          navigate("/admin");
-        } else if (freshUser?.role === "Student") {
-          navigate("/student");
-        } else {
-          navigate("/");
+      const response = await axios.post(
+        "/auth/login",
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "csrf-token": csrfToken,
+          },
+          withCredentials: true,
         }
-      }, 200);
-    } else {
-      setError("Login response missing required data.");
+      );
+
+      const res = response.data;
+
+      if (!res.success) {
+        setError(res.message || "Invalid login credentials.");
+        return;
+      }
+
+      // ✅ OTP required
+      if (res.step === "otp-verification" && res.userId) {
+        localStorage.setItem("tempUser", JSON.stringify({ email, _id: res.userId }));
+        localStorage.setItem("tempStep", "otp");
+        return navigate("/verify-login-otp");
+      }
+
+      // ✅ No OTP (Admin or full login)
+      if (res.user && res.token) {
+        localStorage.setItem("user", JSON.stringify(res.user));
+        localStorage.setItem("authToken", res.token);
+
+        setTimeout(() => {
+          const rawUser = localStorage.getItem("user");
+          const freshUser = rawUser ? JSON.parse(rawUser) : null;
+
+          if (freshUser?.role === "Admin") {
+            navigate("/admin");
+          } else if (freshUser?.role === "Student") {
+            navigate("/student");
+          } else {
+            navigate("/");
+          }
+        }, 200);
+      } else {
+        setError("Login response missing required data.");
+      }
+    } catch (error) {
+      console.error("❌ Login Failed:", error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || "Login failed.";
+
+      if (errorMessage.includes("Password expired")) {
+        setError("🔒 Your password has expired. Please reset it.");
+        setTimeout(() => {
+          navigate("/forgot");
+        }, 2500);
+      } else {
+        setError(errorMessage);
+      }
+    } finally {
+      setLoading(false);
     }
-
-  } catch (error) {
-    console.error("❌ Login Failed:", error.response?.data || error.message);
-    setError(error.response?.data?.message || "Login failed.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+  };
 
   return (
     <div className="min-h-screen flex items-start justify-center bg-gray-100 px-4 pt-32">
@@ -333,3 +330,5 @@ if (res.step === "otp-verification" && res.userId) {
 };
 
 export default LoginPage;
+
+

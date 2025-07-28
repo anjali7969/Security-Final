@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaBook, FaCheckCircle, FaHeart, FaListAlt, FaTimes } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom"; // ✅ Add useParams
 import { toast } from "react-toastify";
@@ -46,99 +46,107 @@ const StudentDashboard = ({ user }) => {
     });
 
     const handleEnroll = async (courseId) => {
-        try {
-            const user = JSON.parse(localStorage.getItem("user"));
-            if (!user || !user._id) {
-                toast.error("Please log in to enroll in a course!");
-                return;
-            }
+    try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("authToken");
+        const csrfToken = localStorage.getItem("csrfToken"); // ✅ Get CSRF token from localStorage
 
-            // ✅ Step 1: Check Enrollment Status
-            const checkResponse = await fetch(`http://localhost:5003/courses/enrollment/check/${user._id}/${courseId}`, {
+        if (!user || !user._id) {
+            toast.error("Please log in to enroll in a course!");
+            return;
+        }
+
+        // ✅ Step 1: Check Enrollment Status
+        const checkResponse = await fetch(`http://localhost:5003/courses/enrollment/check/${user._id}/${courseId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "X-CSRF-Token": csrfToken // ✅ CSRF Token here too
+            }
+        });
+
+        const checkData = await checkResponse.json();
+
+        if (checkData.enrolled) {
+            toast.info("Already Enrolled in this Course!");
+
+            // ✅ Step 2: Fetch Course Details & Update Cart
+            const courseResponse = await fetch(`http://localhost:5003/courses/${courseId}`, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                    Authorization: `Bearer ${token}`,
+                    "X-CSRF-Token": csrfToken
                 }
             });
 
-            const checkData = await checkResponse.json();
+            const courseData = await courseResponse.json();
 
-            if (checkData.enrolled) {
-                toast.info("Already Enrolled in this Course!");
-
-                // ✅ Step 2: Fetch Course Details & Update Cart
-                const courseResponse = await fetch(`http://localhost:5003/courses/${courseId}`, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("authToken")}`
-                    }
-                });
-
-                const courseData = await courseResponse.json();
-
-                let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-                const isCourseInCart = cart.some(item => item.id === courseId);
-                if (!isCourseInCart) {
-                    cart.push({
-                        id: courseId,
-                        name: courseData.title,
-                        price: courseData.price,
-                        image: courseData.image
-                            ? `http://localhost:5003${courseData.image.startsWith("/") ? courseData.image : "/" + courseData.image}`
-                            : "/default-image.jpg",
-                        quantity: 1
-                    });
-
-                    localStorage.setItem("cart", JSON.stringify(cart)); // ✅ Update localStorage cart
-                    setCartCount(cart.length); // ✅ Update cart count instantly
-                    window.dispatchEvent(new Event("storage")); // ✅ Trigger UI update
-                    console.log("🛒 Course added to cart:", courseData.title);
-                }
-                return;
-            }
-
-            // ✅ Step 3: If Not Enrolled, Enroll the User
-            const response = await fetch(`http://localhost:5003/courses/${courseId}/enroll`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
-                }
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                toast.error(`Enrollment Failed: ${data.message}`);
-                return;
-            }
-
-            console.log("✅ Enrollment Successful:", data);
-
-            // ✅ Step 4: Add to Cart After Enrollment
             let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
             const isCourseInCart = cart.some(item => item.id === courseId);
             if (!isCourseInCart) {
                 cart.push({
                     id: courseId,
-                    name: data.enrollment.title,
-                    price: data.enrollment.price,
-                    image: `http://localhost:5003${data.enrollment.image.startsWith("/") ? data.enrollment.image : "/" + data.enrollment.image}`,
+                    name: courseData.title,
+                    price: courseData.price,
+                    image: courseData.image
+                        ? `http://localhost:5003${courseData.image.startsWith("/") ? courseData.image : "/" + courseData.image}`
+                        : "/default-image.jpg",
                     quantity: 1
                 });
 
-                localStorage.setItem("cart", JSON.stringify(cart)); // ✅ Update localStorage cart
-                setCartCount(cart.length); // ✅ Update cart count instantly
-                window.dispatchEvent(new Event("storage")); // ✅ Trigger UI update
-                console.log("🛒 Course added to cart:", data.enrollment.title);
+                localStorage.setItem("cart", JSON.stringify(cart));
+                setCartCount(cart.length);
+                window.dispatchEvent(new Event("storage"));
+                console.log("🛒 Course added to cart:", courseData.title);
             }
-
-            toast.success("Enrollment Successful! 🎉");
-
-        } catch (error) {
-            console.error("❌ Error during enrollment:", error);
+            return;
         }
-    };
+
+        const response = await fetch(`http://localhost:5003/courses/${courseId}/enroll`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "X-CSRF-Token": csrfToken
+    },
+    credentials: "include" // ✅ VERY IMPORTANT
+});
+
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            toast.error(`Enrollment Failed: ${data.message}`);
+            return;
+        }
+
+        console.log("✅ Enrollment Successful:", data);
+
+        // ✅ Step 4: Add to Cart After Enrollment
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        const isCourseInCart = cart.some(item => item.id === courseId);
+        if (!isCourseInCart) {
+            cart.push({
+                id: courseId,
+                name: data.enrollment.title,
+                price: data.enrollment.price,
+                image: `http://localhost:5003${data.enrollment.image.startsWith("/") ? data.enrollment.image : "/" + data.enrollment.image}`,
+                quantity: 1
+            });
+
+            localStorage.setItem("cart", JSON.stringify(cart));
+            setCartCount(cart.length);
+            window.dispatchEvent(new Event("storage"));
+            console.log("🛒 Course added to cart:", data.enrollment.title);
+        }
+
+        toast.success("Enrollment Successful! 🎉");
+
+    } catch (error) {
+        console.error("❌ Error during enrollment:", error);
+    }
+};
+
 
 
 
@@ -264,19 +272,24 @@ const StudentDashboard = ({ user }) => {
 
 
     useEffect(() => {
-        const checkEnrollmentStatus = async () => {
-            if (!user || !user._id) return;
+    const checkEnrollmentStatus = async () => {
+        if (!user || !user._id) return;
 
-            const response = await fetch(`http://localhost:5003/enrollment/check/${user._id}/${courseId}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
-            });
+        const csrfToken = localStorage.getItem("csrfToken"); // ✅ Get CSRF token
 
-            const data = await response.json();
-            setIsEnrolled(data.enrolled);
-        };
+        const response = await fetch(`http://localhost:5003/enrollment/check/${user._id}/${courseId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                "X-CSRF-Token": csrfToken // ✅ Add CSRF token header
+            }
+        });
 
-        checkEnrollmentStatus();
-    }, [courseId]);
+        const data = await response.json();
+        setIsEnrolled(data.enrolled);
+    };
+
+    checkEnrollmentStatus();
+}, [courseId]);
 
 
     // 🚀 Redirect Admins to /admin instead of Student Dashboard

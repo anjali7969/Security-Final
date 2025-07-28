@@ -25,7 +25,8 @@ const VerifyLoginOtp = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            "csrf-token": localStorage.getItem("csrfToken"),
+            "X-CSRF-Token": localStorage.getItem("csrfToken"),
+
           },
           withCredentials: true,
         }

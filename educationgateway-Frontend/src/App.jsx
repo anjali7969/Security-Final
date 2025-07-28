@@ -92,6 +92,7 @@ import Navbar from "./components/NavBar";
 import AboutUs from "./pages/about_us";
 import AdminDashboard from "./pages/Admin/admin_dashboard";
 import AdminPanel from "./pages/Admin/admin_panel";
+import AdminAuditLog from "./pages/Admin/adminAuditLog";
 import ManageCourses from "./pages/Admin/ManageCourses";
 import ManageOrders from "./pages/Admin/ManageOrders";
 import ManageStudents from "./pages/Admin/ManageStudents";
@@ -171,6 +172,8 @@ function App() {
         <Route path="/cart" element={<ShoppingCart />} />
         <Route path="/checkout/:orderId" element={<Checkout />} />
         <Route path="/verify-login-otp" element={<VerifyLoginOtp />} />
+        
+
 
 
         {/* Auth Redirects */}
@@ -198,6 +201,7 @@ function App() {
             <Route path="courses" element={<ManageCourses />} />
             <Route path="students" element={<ManageStudents />} />
             <Route path="orders" element={<ManageOrders />} />
+            <Route path="/admin/audit-logs" element={<AdminAuditLog />} />
           </Route>
         ) : (
           <Route path="/admin/*" element={<Navigate to="/403" replace />} />

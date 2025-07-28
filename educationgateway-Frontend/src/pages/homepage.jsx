@@ -14,9 +14,17 @@ const HomePage = () => {
   useAutoLogout(); // ✅ This is now valid!
 
   const checkUserStatus = () => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+  try {
+    const rawData = localStorage.getItem("user");
+    const storedUser = rawData && rawData !== "undefined" ? JSON.parse(rawData) : null;
     setUser(storedUser);
-  };
+  } catch (err) {
+    console.error("❌ Failed to parse user from localStorage", err);
+    setUser(null);
+  }
+};
+
+
 
   useEffect(() => {
     checkUserStatus();

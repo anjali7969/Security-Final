@@ -121,26 +121,31 @@ const Navbar = ({ onSignInClick, onSignUpClick, onLogout }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem("user"));
-        if (storedUser) {
-            setUser(storedUser);
-            setIsLoggedIn(true);
-        } else {
-            setIsLoggedIn(false);
-        }
+    const userData = localStorage.getItem("user");
+    const storedUser = userData && userData !== "undefined" ? JSON.parse(userData) : null;
+    
+    if (storedUser) {
+        setUser(storedUser);
+        setIsLoggedIn(true);
+    } else {
+        setIsLoggedIn(false);
+    }
 
-        const updateCartCount = () => {
-            const cart = JSON.parse(localStorage.getItem("cart")) || [];
-            setCartCount(cart.length);
-        };
+    const updateCartCount = () => {
+        const cartData = localStorage.getItem("cart");
+        const cart = cartData && cartData !== "undefined" ? JSON.parse(cartData) : [];
+        setCartCount(cart.length);
+    };
 
-        updateCartCount();
-        window.addEventListener("storage", updateCartCount);
+    updateCartCount();
+    window.addEventListener("storage", updateCartCount);
 
-        return () => {
-            window.removeEventListener("storage", updateCartCount);
-        };
-    }, []);
+    return () => {
+        window.removeEventListener("storage", updateCartCount);
+    };
+}, []);
+
+
 
     const handleLogout = () => {
         localStorage.removeItem("authToken");

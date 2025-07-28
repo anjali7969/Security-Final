@@ -1,7 +1,8 @@
 import { Navigate } from "react-router-dom";
 
 const RedirectIfAuthenticated = ({ children }) => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const raw = localStorage.getItem("user");
+    const user = raw && raw !== "undefined" ? JSON.parse(raw) : null;
 
     if (user) {
         if (user.role === "Admin") {
@@ -10,7 +11,7 @@ const RedirectIfAuthenticated = ({ children }) => {
         if (user.role === "Student") {
             return <Navigate to="/student" replace />;
         }
-        // Optional fallback for any other roles
+        // Fallback for any other roles
         return <Navigate to="/" replace />;
     }
 

@@ -1,3 +1,4 @@
+import { BsShieldLock } from "react-icons/bs"; // ✅ New icon for Audit Logs
 import { FaClipboardList } from "react-icons/fa";
 import { FiBook, FiHome, FiLogOut, FiUsers } from "react-icons/fi";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -74,6 +75,20 @@ const Sidebar = ({ onLogout }) => {
                     }
                 >
                     <FaClipboardList className="text-lg" /> Orders
+                </NavLink>
+
+                {/* ✅ New Audit Log Link */}
+                <NavLink
+                    to="/admin/audit-logs"
+                    className={({ isActive }) =>
+                        `flex items-center gap-3 px-5 py-3 rounded-lg transition-all duration-200 ${
+                            isActive
+                                ? "bg-indigo-100 text-indigo-700 font-semibold"
+                                : "hover:bg-gray-50 hover:text-indigo-500"
+                        }`
+                    }
+                >
+                    <BsShieldLock className="text-lg" /> Audit Logs
                 </NavLink>
             </nav>
 
