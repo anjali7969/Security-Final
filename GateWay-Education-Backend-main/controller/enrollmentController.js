@@ -5,42 +5,40 @@ const Course = require("../models/course");
 // ✅ Enroll a User in a Course
 const enrollUser = async (req, res) => {
     try {
-        const { userId, courseId } = req.body;
+        const userId = req.user.id; // ✅ Get user ID from token
+  const { courseId } = req.params; // ✅ Get course ID from URL param
 
-        // ❌ Check if user or course ID is missing
-        if (!userId || !courseId) {
-            return res.status(400).json({ message: "User ID and Course ID are required." });
-        }
-
-        // ❌ Check if the user exists
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found." });
-        }
-
-        // ❌ Check if the course exists
         const course = await Course.findById(courseId);
         if (!course) {
-            return res.status(404).json({ message: "Course not found." });
+            return res.status(404).json({ message: "Course not found" });
         }
 
-        // ❌ Check if user is already enrolled in the course
         const existingEnrollment = await Enrollment.findOne({ userId, courseId });
         if (existingEnrollment) {
-            return res.status(400).json({ message: "User is already enrolled in this course." });
+            return res.status(400).json({ message: "Already enrolled in this course" });
         }
 
-        // ✅ Create new enrollment
         const newEnrollment = new Enrollment({ userId, courseId });
         await newEnrollment.save();
 
-        res.status(201).json({ message: "Enrollment successful!", enrollment: newEnrollment });
+        course.students.push(userId);
+        await course.save();
+
+        res.status(200).json({
+            message: "Successfully enrolled in course",
+            enrollment: {
+                title: course.title,
+                price: course.price,
+                image: course.image,
+            }
+        });
 
     } catch (error) {
-        console.error("❌ Error enrolling user:", error);
+        console.error("❌ Error enrolling student:", error);
         res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
+
 
 // ✅ Get All Enrollments // ✅ Populate User and Course Details
 const getAllEnrollments = async (req, res) => {

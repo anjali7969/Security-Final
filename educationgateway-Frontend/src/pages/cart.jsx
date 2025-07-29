@@ -69,7 +69,7 @@ const ShoppingCart = () => {
     try {
       setIsProcessing(true);
       const response = await axios.post(
-        "http://localhost:5003/order/confirm",
+        "https://localhost:5003/order/confirm",
         orderData,
         {
           headers: {

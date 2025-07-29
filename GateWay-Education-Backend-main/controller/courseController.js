@@ -153,7 +153,8 @@ const getCourseById = async (req, res) => {
 // ✅ Check if User is Already Enrolled
 const checkEnrollment = async (req, res) => {
     try {
-        const userId = req.user.id; // ✅ Use `req.user.id` instead of `req.params.userId`
+        const userId = req.user._id; // ✅ Fix this too
+
         const { courseId } = req.params;
 
         const existingEnrollment = await Enrollment.findOne({ userId, courseId });
@@ -164,40 +165,51 @@ const checkEnrollment = async (req, res) => {
 
         return res.status(200).json({ enrolled: false });
     } catch (error) {
-        console.error("Error checking enrollment:", error.message);
+        console.error("❌ Error checking enrollment:", error.message);
         res.status(500).json({ message: "Server Error", error: error.message });
     }
 };
 
 
+
 // ✅ Enroll a Student in a Course
 const enrollStudent = async (req, res) => {
-    try {
-        const userId = req.user.id; // ✅ Get user ID from req.user
-        const { courseId } = req.params;
+  try {
+    const userId = req.user?._id;
+    const { courseId } = req.params;
 
-        const course = await Course.findById(courseId);
-        if (!course) {
-            return res.status(404).json({ message: "Course not found" });
-        }
-
-        const existingEnrollment = await Enrollment.findOne({ userId, courseId });
-        if (existingEnrollment) {
-            return res.status(400).json({ message: "Already enrolled in this course" });
-        }
-
-        const newEnrollment = new Enrollment({ userId, courseId });
-        await newEnrollment.save();
-
-        course.students.push(userId);
-        await course.save();
-
-        res.status(200).json({ message: "Successfully enrolled in course", enrollment: newEnrollment });
-    } catch (error) {
-        console.error("❌ Error enrolling student:", error);
-        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: User not found in request" });
     }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    const existingEnrollment = await Enrollment.findOne({ userId, courseId });
+    if (existingEnrollment) {
+      return res.status(400).json({ message: "Already enrolled in this course" });
+    }
+
+    const newEnrollment = new Enrollment({ userId, courseId });
+    await newEnrollment.save();
+
+    if (!course.students.includes(userId)) {
+      course.students.push(userId);
+      await course.save();
+    }
+
+    res.status(200).json({ message: "Successfully enrolled", enrollment: newEnrollment });
+  } catch (error) {
+    console.error("❌ Error enrolling student:", error.message);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
 };
+
+
+
+
 
 
 

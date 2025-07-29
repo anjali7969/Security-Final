@@ -11,7 +11,7 @@ const ForgotPasswordSimple = () => {
 
     // ✅ Fetch CSRF Token on Mount
     useEffect(() => {
-        axios.get("http://localhost:5003/get-csrf-token", { withCredentials: true })
+        axios.get("https://localhost:5003/get-csrf-token", { withCredentials: true })
             .then(res => setCsrfToken(res.data.csrfToken))
             .catch(err => console.error("Failed to fetch CSRF token:", err));
     }, []);
@@ -21,7 +21,7 @@ const ForgotPasswordSimple = () => {
         setLoading(true);
 
         try {
-            await axios.post("http://localhost:5003/auth/reset-password-request",
+            await axios.post("https://localhost:5003/auth/reset-password-request",
                 { email },
                 {
                     headers: {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const CourseDetails = () => {
@@ -12,7 +12,7 @@ const CourseDetails = () => {
     useEffect(() => {
         const fetchCourse = async () => {
             try {
-                const response = await axios.get(`http://localhost:5003/courses/${courseId}`);
+                const response = await axios.get(`https://localhost:5003/courses/${courseId}`);
                 setCourse(response.data);
             } catch (error) {
                 console.error("Error fetching course:", error.response?.data || error.message);
@@ -21,7 +21,7 @@ const CourseDetails = () => {
 
         const checkEnrollment = async () => {
             try {
-                const response = await axios.get(`http://localhost:5003/checkout/user-orders/${userId}`);
+                const response = await axios.get(`https://localhost:5003/checkout/user-orders/${userId}`);
                 const enrolledCourses = response.data.map(order => order.course._id);
                 setIsEnrolled(enrolledCourses.includes(courseId));
             } catch (error) {
@@ -41,7 +41,7 @@ const CourseDetails = () => {
                 return;
             }
 
-            const response = await axios.post("http://localhost:5003/checkout/create-order", {
+            const response = await axios.post("https://localhost:5003/checkout/create-order", {
                 userId,
                 courseId
             });
@@ -62,7 +62,7 @@ const CourseDetails = () => {
     // ✅ Redirect to Payment for Paid Courses
     const redirectToPayment = async (orderId) => {
         try {
-            const response = await axios.get(`http://localhost:5003/checkout/checkout/${orderId}`);
+            const response = await axios.get(`https://localhost:5003/checkout/checkout/${orderId}`);
             if (response.data.paymentUrl) {
                 window.location.href = response.data.paymentUrl;
             }

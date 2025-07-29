@@ -57,7 +57,7 @@ const StudentDashboard = ({ user }) => {
         }
 
         // ✅ Step 1: Check Enrollment Status
-        const checkResponse = await fetch(`http://localhost:5003/courses/enrollment/check/${user._id}/${courseId}`, {
+        const checkResponse = await fetch(`https://localhost:5003/courses/enrollment/check/${user._id}/${courseId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "X-CSRF-Token": csrfToken // ✅ CSRF Token here too
@@ -70,7 +70,7 @@ const StudentDashboard = ({ user }) => {
             toast.info("Already Enrolled in this Course!");
 
             // ✅ Step 2: Fetch Course Details & Update Cart
-            const courseResponse = await fetch(`http://localhost:5003/courses/${courseId}`, {
+            const courseResponse = await fetch(`https://localhost:5003/courses/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "X-CSRF-Token": csrfToken
@@ -88,7 +88,7 @@ const StudentDashboard = ({ user }) => {
                     name: courseData.title,
                     price: courseData.price,
                     image: courseData.image
-                        ? `http://localhost:5003${courseData.image.startsWith("/") ? courseData.image : "/" + courseData.image}`
+                        ? `https://localhost:5003${courseData.image.startsWith("/") ? courseData.image : "/" + courseData.image}`
                         : "/default-image.jpg",
                     quantity: 1
                 });
@@ -101,7 +101,7 @@ const StudentDashboard = ({ user }) => {
             return;
         }
 
-        const response = await fetch(`http://localhost:5003/courses/${courseId}/enroll`, {
+        const response = await fetch(`https://localhost:5003/courses/${courseId}/enroll`, {
     method: "POST",
     headers: {
         "Content-Type": "application/json",
@@ -130,7 +130,7 @@ const StudentDashboard = ({ user }) => {
                 id: courseId,
                 name: data.enrollment.title,
                 price: data.enrollment.price,
-                image: `http://localhost:5003${data.enrollment.image.startsWith("/") ? data.enrollment.image : "/" + data.enrollment.image}`,
+                image: `https://localhost:5003${data.enrollment.image.startsWith("/") ? data.enrollment.image : "/" + data.enrollment.image}`,
                 quantity: 1
             });
 
@@ -222,7 +222,7 @@ const StudentDashboard = ({ user }) => {
                 console.log("🚀 Removing from wishlist:", course._id);
 
                 // ✅ Remove from Wishlist API Call
-                await fetch(`http://localhost:5003/wishlist/remove/${storedUser._id}/${course._id}`, {
+                await fetch(`https://localhost:5003/wishlist/remove/${storedUser._id}/${course._id}`, {
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",
@@ -239,7 +239,7 @@ const StudentDashboard = ({ user }) => {
                 toast.info("Adding to Wishlist...");
 
                 // ✅ Add to Wishlist API Call
-                const response = await fetch("http://localhost:5003/wishlist/add", {
+                const response = await fetch("https://localhost:5003/wishlist/add", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -277,7 +277,7 @@ const StudentDashboard = ({ user }) => {
 
         const csrfToken = localStorage.getItem("csrfToken"); // ✅ Get CSRF token
 
-        const response = await fetch(`http://localhost:5003/enrollment/check/${user._id}/${courseId}`, {
+        const response = await fetch(`https://localhost:5003/enrollment/check/${user._id}/${courseId}`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 "X-CSRF-Token": csrfToken // ✅ Add CSRF token header
@@ -345,7 +345,7 @@ const StudentDashboard = ({ user }) => {
                 return;
             }
 
-            const response = await fetch(`http://localhost:5003/wishlist/${storedUser._id}`, {
+            const response = await fetch(`https://localhost:5003/wishlist/${storedUser._id}`, {
                 headers: {
                     "Authorization": `Bearer ${token}` // ✅ Send the token
                 }
@@ -515,7 +515,7 @@ const StudentDashboard = ({ user }) => {
                                     {filteredCourses.map((course) => (
                                         <div key={course._id} className="bg-white p-4 rounded-lg shadow-md">
                                             <img
-                                                src={course.image ? `http://localhost:5003${course.image.startsWith("/") ? course.image : "/" + course.image}` : "/default-image.jpg"}
+                                                src={course.image ? `https://localhost:5003${course.image.startsWith("/") ? course.image : "/" + course.image}` : "/default-image.jpg"}
                                                 alt={course.title || "Course Image"}
                                                 className="w-full h-36 object-cover rounded"
                                             />
@@ -571,7 +571,7 @@ const StudentDashboard = ({ user }) => {
                                 {/* 📌 Left Side - Course Image */}
                                 <div className="md:w-1/2 flex justify-center items-center">
                                     <img
-                                        src={selectedCourse.image ? `http://localhost:5003${selectedCourse.image.startsWith("/") ? selectedCourse.image : "/" + selectedCourse.image}` : "/default-image.jpg"}
+                                        src={selectedCourse.image ? `https://localhost:5003${selectedCourse.image.startsWith("/") ? selectedCourse.image : "/" + selectedCourse.image}` : "/default-image.jpg"}
                                         alt={selectedCourse.title}
                                         className="w-full h-64 object-cover rounded-lg"
                                     />
@@ -645,7 +645,7 @@ const StudentDashboard = ({ user }) => {
                                                     {/* ✅ Course Image & Name */}
                                                     <td className="p-4 flex items-center space-x-4">
                                                         <img
-                                                            src={course.image ? `http://localhost:5003${course.image}` : "/default-course.jpg"}
+                                                            src={course.image ? `https://localhost:5003${course.image}` : "/default-course.jpg"}
                                                             alt={course.title}
                                                             className="w-16 h-16 rounded object-cover"
                                                         />

@@ -10,7 +10,7 @@ const Checkout = () => {
     useEffect(() => {
         const fetchCsrf = async () => {
             try {
-                const res = await fetch("http://localhost:5003/get-csrf-token", {
+                const res = await fetch("https://localhost:5003/get-csrf-token", {
                     credentials: "include"
                 });
                 const data = await res.json();
@@ -26,7 +26,7 @@ const Checkout = () => {
     useEffect(() => {
         const fetchOrderDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:5003/checkout/user-orders/${orderId}`, {
+                const response = await fetch(`https://localhost:5003/checkout/user-orders/${orderId}`, {
                     method: "GET",
                     credentials: "include",
                     headers: {

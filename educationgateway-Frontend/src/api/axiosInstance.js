@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create instance
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5003',
+  baseURL: 'https://localhost:5003',
   withCredentials: true, // Send cookies
 });
 
@@ -15,7 +15,7 @@ axiosInstance.interceptors.request.use(
     // Fetch CSRF token once if not yet fetched
     if (!csrfToken) {
       try {
-        const response = await axios.get('http://localhost:5003/get-csrf-token', {
+        const response = await axios.get('https://localhost:5003/get-csrf-token', {
           withCredentials: true,
         });
         csrfToken = response.data.csrfToken;

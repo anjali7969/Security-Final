@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 //  Backend API Base URL
-const API_BASE_URL = "http://localhost:5003";  // Change this when deploying
+const API_BASE_URL = "https://localhost:5003";  // Change this when deploying
 
 //  Axios Instance for API Calls
 const api = axios.create({
@@ -169,7 +169,7 @@ export const updateCourse = async (courseId, updatedData, csrfToken) => {
 // ✅ Delete Course
 export const deleteCourse = async (id) => {
     try {
-        const response = await fetch(`http://localhost:5003/courses/delete/${id}`, {
+        const response = await fetch(`https://localhost:5003/courses/delete/${id}`, {
             method: "DELETE",
         });
 
@@ -230,7 +230,7 @@ export const addToWishlist = async (courseId) => {
 
 export const removeFromWishlist = async (userId, courseId) => {
     try {
-        const response = await axios.delete(`http://localhost:5003/wishlist/remove`, {
+        const response = await axios.delete(`https://localhost:5003/wishlist/remove`, {
             data: { userId, courseId }, // Ensure correct format for DELETE request
         });
 

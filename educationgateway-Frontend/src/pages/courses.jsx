@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiGrid, FiList, FiSearch } from "react-icons/fi";
 import Footer from "../components/Footer";
 import Navbar from "../components/NavBar";
@@ -26,7 +26,7 @@ const Courses = () => {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:5003/courses/all", {
+                const response = await axios.get("https://localhost:5003/courses/all", {
                     headers: {
                         Authorization: `Bearer ${authToken}`,
                         "Content-Type": "application/json",
@@ -123,7 +123,7 @@ const Courses = () => {
                                     onClick={() => setSelectedCourse(course)}
                                 >
                                     <img
-                                        src={course.image ? `http://localhost:5003${course.image}` : "/default-image.png"} // ✅ Fixed Image Path
+                                        src={course.image ? `https://localhost:5003${course.image}` : "/default-image.png"} // ✅ Fixed Image Path
                                         alt={course.title}
                                         className={`rounded-md ${viewMode === "list" ? "w-24 h-24" : "w-full h-48"} object-cover`}
                                         onError={(e) => { e.target.src = "/default-image.png"; }} // ✅ Fallback Image
