@@ -34,4 +34,4 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return children;
 };
 
-export default ProtectedRoute;
+export default ProtectedRoute; // This component checks if the user is authenticated and has the right role before rendering the children components. If not, it redirects to the login page or a forbidden page.
