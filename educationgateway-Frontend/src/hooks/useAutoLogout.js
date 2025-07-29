@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+// useAutoLogout hook to automatically log out users after a period of inactivity
 const useAutoLogout = (timeout = 5 * 60 * 1000) => { // default: 5 minutes
   const navigate = useNavigate();
 
