@@ -134,8 +134,8 @@ import {
   ShoppingCart,
   TrendingUp,
   Users,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+} from "lucide-react"; // Importing necessary icons from lucide-react
+import { useEffect, useState } from "react"; // Importing React hooks
 import {
   CartesianGrid,
   LineChart,
@@ -182,7 +182,7 @@ const AdminDashboard = () => {
       }
     };
 
-    const fetchCourses = async () => {
+    const fetchCourses = async () => { // Fetch total courses
       try {
         const courses = await getCourses();
         setTotalCourses(courses.length);
