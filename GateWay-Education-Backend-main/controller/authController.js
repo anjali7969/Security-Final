@@ -12,6 +12,7 @@ const CryptoJS = require("crypto-js");
 // Import mailer
 const transporter = require('../middlewares/mailConfig');
 
+// Import encryption utility
 const encryptEmailDeterministic  = (email) => {
     return CryptoJS.HmacSHA256(email, process.env.EMAIL_SECRET).toString();
 };
@@ -43,14 +44,22 @@ const registerUser = async (req, res) => {
         phone = validator.escape(phone.trim());
         role = (role || "Student").trim(); // ✅ Clean up role
 
+        // ✅ Check required fields
         if (!name || !email || !password || !phone) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
+        // ✅ Check name max length
+        if (name.length > 50) {
+            return res.status(400).json({ message: "Name must not exceed 50 characters" });
+        }
+
+        // ✅ Validate email format
         if (!validator.isEmail(email)) {
             return res.status(400).json({ message: "Invalid email format" });
         }
 
+        // ✅ Strong password check
         const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
         if (!strongPasswordRegex.test(password)) {
             return res.status(400).json({
@@ -69,14 +78,13 @@ const registerUser = async (req, res) => {
 
         // ✅ Create new user with encrypted email
         const user = await User.create({
-        name,
-        email: encryptedEmail,
-        password,
-        phone,
-        role,
-        passwordLastChanged: new Date() // ✅ Add this line
-    });
-
+            name,
+            email: encryptedEmail,
+            password,
+            phone,
+            role,
+            passwordLastChanged: new Date() // ✅ Add this line
+        });
 
         const token = generateToken(user);
 
@@ -102,6 +110,7 @@ const registerUser = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
 
 
 
