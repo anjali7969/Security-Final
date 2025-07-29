@@ -1,5 +1,6 @@
-import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom"; // RedirectIfAuthenticated component
 
+// RedirectIfAuthenticated component checks if a user is authenticated
 const RedirectIfAuthenticated = ({ children }) => {
     const raw = localStorage.getItem("user");
     const user = raw && raw !== "undefined" ? JSON.parse(raw) : null;
