@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import zxcvbn from "zxcvbn";
-import { registerUser } from "../api/api";
+import { registerUser } from "../api/api"; // ✅ Import registerUser function
 import axios from "../api/axiosInstance"; // ✅ CSRF-protected Axios
 import Navbar from "../components/NavBar"; // ✅ Import Navbar
 
