@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "../api/axiosInstance";
 
 const VerifyLoginOtp = () => {
@@ -10,46 +12,56 @@ const VerifyLoginOtp = () => {
   const token = localStorage.getItem("tempToken");
 
   const handleVerify = async () => {
-    try {
-      if (!user?._id) {
-        setError("User ID not found in tempUser.");
-        return;
-      }
-
-      const response = await axios.post(
-        "/auth/verify-login-otp",
-        {
-          userId: user._id,
-          otp: otp.trim(),
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-Token": localStorage.getItem("csrfToken"),
-
-          },
-          withCredentials: true,
-        }
-      );
-
-      if (response.data.message === "OTP verified successfully") {
-        localStorage.setItem("user", JSON.stringify(response.data.tempUser));
-        localStorage.setItem("authToken", response.data.tempToken);
-        localStorage.removeItem("tempUser");
-        localStorage.removeItem("tempToken");
-
-        navigate("/student");
-      } else {
-        setError("Invalid OTP. Try again.");
-      }
-    } catch (err) {
-      console.error("OTP verification failed:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "Failed to verify OTP.");
+  try {
+    if (!user?._id) {
+      setError("User ID not found in tempUser.");
+      toast.error("User ID missing.");
+      return;
     }
-  };
+
+    const response = await axios.post(
+      "/auth/verify-login-otp",
+      {
+        userId: user._id,
+        otp: otp.trim(),
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": localStorage.getItem("csrfToken"),
+        },
+        withCredentials: true,
+      }
+    );
+
+    if (response.data.message === "OTP verified successfully") {
+      localStorage.setItem("user", JSON.stringify(response.data.tempUser));
+      localStorage.setItem("authToken", response.data.tempToken);
+      localStorage.removeItem("tempUser");
+      localStorage.removeItem("tempToken");
+
+      toast.success("✅ OTP verified successfully!");
+
+      // ⏳ Delay redirect to allow toast to show
+      setTimeout(() => {
+        navigate("/student");
+      }, 2000);
+    } else {
+      setError("Invalid OTP. Try again.");
+      toast.error("❌ Invalid OTP. Try again.");
+    }
+  } catch (err) {
+    console.error("OTP verification failed:", err.response?.data || err.message);
+    const errorMsg = err.response?.data?.message || "Failed to verify OTP.";
+    setError(errorMsg);
+    toast.error(`❌ ${errorMsg}`);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+      <ToastContainer />
       <div className="bg-white shadow-2xl rounded-xl p-10 w-full max-w-md border border-gray-200">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800">🔐 Verify OTP</h2>
@@ -60,14 +72,12 @@ const VerifyLoginOtp = () => {
         </div>
 
         <input
-  type="text"
-  placeholder="Enter OTP"
-  value={otp}
-  onChange={(e) => setOtp(e.target.value)}
-  className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-800 placeholder-gray-500 mb-4 text-left font-[Poppins]"
-/>
-
-
+          type="text"
+          placeholder="Enter OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-800 placeholder-gray-500 mb-4 text-left font-[Poppins]"
+        />
 
         {error && <p className="text-red-500 text-sm mb-3 text-center">{error}</p>}
 

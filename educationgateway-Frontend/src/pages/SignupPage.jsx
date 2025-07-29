@@ -25,34 +25,52 @@ const SignupPage = () => {
     }, []);
 
     const handleSignup = async () => {
-        setLoading(true);
-        setError("");
+    setLoading(true);
+    setError("");
 
-        try {
-            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
-            if (!strongPasswordRegex.test(password)) {
-                setError("Password must include uppercase, lowercase, number, special character (min 8 chars)");
-                setLoading(false);
-                return;
-            }
-
-            const userData = {
-                name,
-                email,
-                phone,
-                password,
-                role: "Student",
-            };
-
-            await registerUser(userData);
-            alert("Registration Successful!");
-            navigate("/login");
-        } catch (error) {
-            setError(error.response?.data?.message || "Something went wrong. Try again.");
-        } finally {
+    try {
+        // ✅ Max length check for name
+        if (name.length > 50) {
+            setError("Name must not exceed 50 characters.");
             setLoading(false);
+            return;
         }
-    };
+
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        if (!strongPasswordRegex.test(password)) {
+            setError("Password must include uppercase, lowercase, number, special character (min 8 chars)");
+            setLoading(false);
+            return;
+        }
+
+        const userData = {
+            name,
+            email,
+            phone,
+            password,
+            role: "Student",
+        };
+
+        // ✅ Client-side payload size limit (10KB)
+        const payloadSize = new Blob([JSON.stringify(userData)]).size;
+        if (payloadSize > 10240) {
+            setError("Payload too large. Please reduce input size.");
+            setLoading(false);
+            return;
+        }
+
+        await registerUser(userData);
+        alert("Registration Successful!");
+        navigate("/login");
+    } catch (error) {
+        setError(error.response?.data?.message || "Something went wrong. Try again.");
+    } finally {
+        setLoading(false);
+    }
+};
+
+
+
 
     return (
         <div className="min-h-screen bg-[#f5f6f9] flex flex-col">
@@ -71,12 +89,14 @@ const SignupPage = () => {
                     )}
 
                     <input
-                        type="text"
-                        className="w-full h-12 text-gray-900 placeholder-gray-400 text-sm rounded-full border border-gray-300 bg-white shadow-md focus:outline-none px-6 mb-5"
-                        placeholder="Enter your full name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
+                    type="text"
+                    maxLength={50} // ✅ Optional: prevent typing more than 20 chars
+                    className="w-full h-12 text-gray-900 placeholder-gray-400 text-sm rounded-full border border-gray-300 bg-white shadow-md focus:outline-none px-6 mb-5"
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+
 
                     <input
                         type="email"
