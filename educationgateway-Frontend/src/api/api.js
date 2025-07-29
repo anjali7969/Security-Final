@@ -38,6 +38,7 @@ export const registerUser = async (userData) => {
       }
     });
 
+    // ✅ Store token if available
     console.log("✅ Response received:", response.data);
     return response.data;
   } catch (error) {
