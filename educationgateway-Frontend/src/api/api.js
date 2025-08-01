@@ -66,7 +66,7 @@ export const loginUser = async (userData) => {
         console.error("❌ Login Error:", error.response?.data || error.message);
         throw error;
     }
-};
+}; // ✅ Logout User Function
 
 // ✅ Get All Users
 export const getAllUsers = async () => {
