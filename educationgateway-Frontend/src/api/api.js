@@ -34,7 +34,7 @@ export const registerUser = async (userData) => {
     // ✅ Include CSRF token in headers
     const response = await api.post("/auth/register", userData, {
       headers: {
-        "CSRF-Token": csrfToken,
+        "CSRF-Token": csrfToken, 
       }
     });
 

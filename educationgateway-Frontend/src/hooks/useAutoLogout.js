@@ -30,4 +30,4 @@ const useAutoLogout = (timeout = 5 * 60 * 1000) => { // default: 5 minutes
   }, [navigate, timeout]);
 };
 
-export default useAutoLogout;
+export default useAutoLogout; // ✅ useAutoLogout Hook
