@@ -87,7 +87,7 @@ if (import.meta.env.VITE_DISABLE_LOGS === "true") {
 }
 
 import { useEffect, useState } from "react";
-import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom"; // ✅ Import necessary components
 import Navbar from "./components/NavBar";
 import AboutUs from "./pages/about_us";
 import AdminDashboard from "./pages/Admin/admin_dashboard";
@@ -190,7 +190,7 @@ function App() {
           element={
             <RedirectIfAuthenticated>
               <SignupPage />
-            </RedirectIfAuthenticated>
+            </RedirectIfAuthenticated>// ✅ RedirectIfAuthenticated
           }
         />
 
